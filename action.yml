@@ -1,0 +1,19 @@
+name: 'PR Analysis Action'
+description: 'Analyzes pull requests and provides a summary of changes'
+author: 'Your Name'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  pr-number:
+    description: 'Pull request number to analyze'
+    required: true
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'eye'
+  color: 'blue' 
