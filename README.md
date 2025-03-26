@@ -1,13 +1,31 @@
 # PR Analysis Action
 
-A GitHub Action that analyzes pull requests and provides a detailed summary of changes.
+📊 A GitHub Action that provides detailed analysis of pull requests, helping teams understand the scope and impact of changes.
 
 ## Features
 
-- Counts the number of files changed
-- Calculates lines added and removed
-- Provides a detailed breakdown of changes per file
-- Posts results as a comment on the PR
+- 📁 Counts the number of files changed
+- ✨ Calculates lines added and removed
+- 📈 Provides a detailed breakdown of changes per file
+- 💬 Posts results as a comment on the PR
+- 🔄 Updates on PR synchronization
+
+## Example Output
+
+```markdown
+## 📊 Pull Request Analysis
+
+### Overview
+- 📁 Files changed: 3
+- ✨ Lines added: 150
+- 🗑️ Lines removed: 50
+- 📈 Total changes: 200
+
+### Files Changed
+- `src/index.ts` (+100/-30)
+- `README.md` (+40/-15)
+- `package.json` (+10/-5)
+```
 
 ## Usage
 
@@ -19,13 +37,17 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+permissions:
+  pull-requests: write  # Required for posting comments
+  contents: read       # Required for reading PR content
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run PR Analysis
-        uses: your-username/pr-analysis-action@v1
+        uses: david-wagih/pr-analysis-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-number: ${{ github.event.pull_request.number }}
@@ -33,10 +55,10 @@ jobs:
 
 ## Inputs
 
-| Name | Description | Required |
-|------|-------------|----------|
-| `github-token` | GitHub token for API access | Yes |
-| `pr-number` | Pull request number to analyze | Yes |
+| Name | Description | Required | Default |
+|------|-------------|----------|---------|
+| `github-token` | GitHub token for API access | Yes | N/A |
+| `pr-number` | Pull request number to analyze | Yes | N/A |
 
 ## Outputs
 
@@ -47,23 +69,17 @@ jobs:
 | `deletions` | Number of lines removed |
 | `total_changes` | Total number of changes |
 
-## Development
+## Use Cases
 
-1. Install dependencies:
-```bash
-npm install
-```
+- 🔍 Quick assessment of PR size and complexity
+- 📈 Tracking changes across multiple files
+- 📊 Generating PR statistics for team metrics
+- 🤖 Automated PR review workflows
 
-2. Build the action:
-```bash
-npm run build
-```
+## Contributing
 
-3. Run tests:
-```bash
-npm test
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT 
+MIT © [david-wagih] 

@@ -1,6 +1,10 @@
 name: 'PR Analysis Action'
-description: 'Analyzes pull requests and provides a summary of changes'
-author: 'Your Name'
+description: 'Analyzes pull requests and provides a detailed summary of changes including files changed, lines added/removed, and more'
+author: 'david-wagih'
+
+branding:
+  icon: 'git-pull-request'
+  color: 'green'
 
 inputs:
   github-token:
@@ -10,10 +14,16 @@ inputs:
     description: 'Pull request number to analyze'
     required: true
 
+outputs:
+  total_files:
+    description: 'Total number of files changed in the PR'
+  additions:
+    description: 'Total number of lines added in the PR'
+  deletions:
+    description: 'Total number of lines deleted in the PR'
+  total_changes:
+    description: 'Total number of changes (additions + deletions)'
+
 runs:
   using: 'node20'
-  main: 'dist/index.js'
-
-branding:
-  icon: 'eye'
-  color: 'blue' 
+  main: 'dist/index.js' 
