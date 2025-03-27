@@ -1,5 +1,5 @@
 name: 'PR Analysis Action'
-description: 'Analyzes pull requests and provides a detailed summary of changes including files changed, lines added/removed, and more'
+description: 'Analyzes pull requests and provides a detailed summary of changes including files changed, lines added/removed, and AI-powered code review'
 author: 'david-wagih'
 
 branding:
@@ -12,6 +12,9 @@ inputs:
     required: true
   pr-number:
     description: 'Pull request number to analyze'
+    required: true
+  openai-key:
+    description: 'OpenAI API key for code review functionality'
     required: true
 
 outputs:
