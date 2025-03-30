@@ -57,7 +57,7 @@ async function run() {
         // Get and validate inputs
         const inputs = {
             'openai-key': core.getInput('openai-key', { required: true }),
-            'config-file': core.getInput('config-file', { required: false })
+            'config-file': core.getInput('config-file', { required: false }),
         };
         // Validate and sanitize tokens
         const token = process.env.GITHUB_TOKEN;
@@ -78,7 +78,7 @@ async function run() {
                 const configContent = await githubService.getFileContent({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    pullNumber: context.payload.pull_request.number
+                    pullNumber: context.payload.pull_request.number,
                 }, inputs['config-file'], context.sha);
                 if ('content' in configContent.data) {
                     const config = JSON.parse(Buffer.from(configContent.data.content, 'base64').toString());
@@ -101,7 +101,7 @@ async function run() {
         const githubContext = {
             owner: context.repo.owner,
             repo: context.repo.repo,
-            pullNumber: context.payload.pull_request.number
+            pullNumber: context.payload.pull_request.number,
         };
         // Get PR details
         const { data: pr } = await githubService.getPullRequest(githubContext);

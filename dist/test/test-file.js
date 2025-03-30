@@ -39,8 +39,8 @@ const API_URL = 'http://localhost:3000';
 const MAX_RETRIES = 3;
 const TIMEOUT = 5000;
 // Code style issue: Inconsistent formatting
-const spaces = "too many spaces";
-const noSpaces = "no spaces around operator";
+const spaces = 'too many spaces';
+const noSpaces = 'no spaces around operator';
 // Documentation issue: Missing JSDoc
 function calculateTotal(items) {
     return items.reduce((sum, item) => sum + item.price, 0);

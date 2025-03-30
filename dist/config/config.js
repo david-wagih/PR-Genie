@@ -5,7 +5,7 @@ exports.DEFAULT_LANGUAGE_CONFIG = {
     fileExtensions: [],
     maxFileSize: 1000000, // 1MB
     ignorePatterns: [],
-    additionalChecks: []
+    additionalChecks: [],
 };
 exports.DEFAULT_REVIEW_CONFIG = {
     languages: {
@@ -15,26 +15,22 @@ exports.DEFAULT_REVIEW_CONFIG = {
             ignorePatterns: [
                 { pattern: '**/*.d.ts', reason: 'TypeScript declaration files' },
                 { pattern: '**/node_modules/**', reason: 'Dependencies' },
-                { pattern: '**/dist/**', reason: 'Build output' }
+                { pattern: '**/dist/**', reason: 'Build output' },
             ],
             additionalChecks: [
                 'TypeScript type safety',
                 'Interface and type definitions',
-                'Generic type usage'
-            ]
+                'Generic type usage',
+            ],
         },
         javascript: {
             fileExtensions: ['js', 'jsx'],
             maxFileSize: 1000000,
             ignorePatterns: [
                 { pattern: '**/node_modules/**', reason: 'Dependencies' },
-                { pattern: '**/dist/**', reason: 'Build output' }
+                { pattern: '**/dist/**', reason: 'Build output' },
             ],
-            additionalChecks: [
-                'ESLint compliance',
-                'Modern JavaScript features',
-                'Async/await patterns'
-            ]
+            additionalChecks: ['ESLint compliance', 'Modern JavaScript features', 'Async/await patterns'],
         },
         python: {
             fileExtensions: ['py'],
@@ -42,34 +38,26 @@ exports.DEFAULT_REVIEW_CONFIG = {
             ignorePatterns: [
                 { pattern: '**/__pycache__/**', reason: 'Python cache files' },
                 { pattern: '**/*.pyc', reason: 'Python compiled files' },
-                { pattern: '**/venv/**', reason: 'Virtual environment' }
+                { pattern: '**/venv/**', reason: 'Virtual environment' },
             ],
-            additionalChecks: [
-                'PEP 8 compliance',
-                'Type hints',
-                'Docstring coverage'
-            ]
+            additionalChecks: ['PEP 8 compliance', 'Type hints', 'Docstring coverage'],
         },
         java: {
             fileExtensions: ['java'],
             maxFileSize: 2000000,
             ignorePatterns: [
                 { pattern: '**/target/**', reason: 'Build output' },
-                { pattern: '**/*.class', reason: 'Compiled files' }
+                { pattern: '**/*.class', reason: 'Compiled files' },
             ],
-            additionalChecks: [
-                'Java coding standards',
-                'Exception handling',
-                'Design patterns'
-            ]
-        }
+            additionalChecks: ['Java coding standards', 'Exception handling', 'Design patterns'],
+        },
     },
     globalIgnorePatterns: [
         { pattern: '**/.git/**', reason: 'Git repository' },
         { pattern: '**/.github/**', reason: 'GitHub configuration' },
         { pattern: '**/coverage/**', reason: 'Test coverage reports' },
         { pattern: '**/*.min.*', reason: 'Minified files' },
-        { pattern: '**/*.map', reason: 'Source maps' }
+        { pattern: '**/*.map', reason: 'Source maps' },
     ],
     defaultMaxFileSize: 1000000,
     defaultPrompt: `You are an expert code reviewer with deep expertise in {language}. Review the following code changes and provide a comprehensive analysis.
@@ -131,10 +119,5 @@ Code to review:
 \`\`\`{language}
 {code}
 \`\`\``,
-    defaultChecks: [
-        'Code organization',
-        'Error handling',
-        'Documentation',
-        'Testing considerations'
-    ]
+    defaultChecks: ['Code organization', 'Error handling', 'Documentation', 'Testing considerations'],
 };

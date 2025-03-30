@@ -102,27 +102,29 @@ ${this.identifySecurityConcerns(files)}
 ${this.generateFileChanges(files)}`;
     }
     estimateReviewEffort(stats) {
-        const score = Math.min(5, Math.ceil((stats.changes / 100) + (stats.totalFiles / 3)));
+        const score = Math.min(5, Math.ceil(stats.changes / 100 + stats.totalFiles / 3));
         return `${score}`;
     }
     explainReviewEffort(stats, files) {
         const reasons = [];
         if (stats.changes > 200) {
-            reasons.push("large number of changes");
+            reasons.push('large number of changes');
         }
         if (stats.totalFiles > 5) {
-            reasons.push("multiple files affected");
+            reasons.push('multiple files affected');
         }
-        if (files.some(f => f.filename.includes('config') || f.filename.endsWith('.json') || f.filename.endsWith('.yml'))) {
-            reasons.push("configuration changes require careful review");
+        if (files.some(f => f.filename.includes('config') ||
+            f.filename.endsWith('.json') ||
+            f.filename.endsWith('.yml'))) {
+            reasons.push('configuration changes require careful review');
         }
         if (files.some(f => f.changes > 100)) {
-            reasons.push("contains large file changes");
+            reasons.push('contains large file changes');
         }
         if (reasons.length === 0) {
-            return "because the changes are straightforward and well-contained.";
+            return 'because the changes are straightforward and well-contained.';
         }
-        return `because of ${reasons.join(", ")}.`;
+        return `because of ${reasons.join(', ')}.`;
     }
     checkRelevantTests(files) {
         const testFiles = files.filter(f => f.filename.includes('test') ||
@@ -130,7 +132,7 @@ ${this.generateFileChanges(files)}`;
             f.filename.endsWith('.test.ts') ||
             f.filename.endsWith('.spec.ts'));
         if (testFiles.length === 0) {
-            return "No test files were modified. Consider adding tests for the changes.";
+            return 'No test files were modified. Consider adding tests for the changes.';
         }
         return `Yes - ${testFiles.map(f => f.filename).join(', ')}`;
     }
@@ -138,21 +140,21 @@ ${this.generateFileChanges(files)}`;
         const issues = [];
         // Check for large files without tests
         if (files.some(f => f.changes > 100) && !files.some(f => f.filename.includes('test'))) {
-            issues.push("Large code changes without corresponding test updates");
+            issues.push('Large code changes without corresponding test updates');
         }
         // Check for configuration changes
         if (files.some(f => f.filename.includes('config'))) {
-            issues.push("Configuration changes may impact environment behavior");
+            issues.push('Configuration changes may impact environment behavior');
         }
         // Check for dependency changes
         if (files.some(f => f.filename.includes('package.json'))) {
-            issues.push("Dependency changes may introduce compatibility issues");
+            issues.push('Dependency changes may introduce compatibility issues');
         }
         // Check for type definition changes
         if (files.some(f => f.filename.endsWith('.d.ts'))) {
-            issues.push("Type definition changes may affect dependent code");
+            issues.push('Type definition changes may affect dependent code');
         }
-        return issues.length > 0 ? issues.join('\n') : "No significant issues identified";
+        return issues.length > 0 ? issues.join('\n') : 'No significant issues identified';
     }
     identifySecurityConcerns(files) {
         const concerns = [];
@@ -162,23 +164,26 @@ ${this.generateFileChanges(files)}`;
             f.filename.includes('password') ||
             f.filename.includes('token') ||
             f.filename.includes('secret'))) {
-            concerns.push("Changes to security-sensitive components");
+            concerns.push('Changes to security-sensitive components');
         }
         // Check for configuration files that might contain secrets
         if (files.some(f => f.filename.endsWith('.env') ||
-            f.filename.includes('config') && (f.filename.endsWith('.json') || f.filename.endsWith('.yml')))) {
-            concerns.push("Modified configuration files - verify no secrets are exposed");
+            (f.filename.includes('config') &&
+                (f.filename.endsWith('.json') || f.filename.endsWith('.yml'))))) {
+            concerns.push('Modified configuration files - verify no secrets are exposed');
         }
-        return concerns.length > 0 ? concerns.join('\n') : "No immediate security concerns identified";
+        return concerns.length > 0 ? concerns.join('\n') : 'No immediate security concerns identified';
     }
     generateFileChanges(files) {
-        return files.map(file => {
+        return files
+            .map(file => {
             const changeType = this.getChangeType(file);
             return `- ${file.filename} (+${file.additions}/-${file.deletions})`;
-        }).join('\n');
+        })
+            .join('\n');
     }
     calculateComplexityScore(stats) {
-        const score = Math.min(10, Math.ceil((stats.changes / 100) + (stats.totalFiles / 3)));
+        const score = Math.min(10, Math.ceil(stats.changes / 100 + stats.totalFiles / 3));
         return `${score}/10`;
     }
     determineReviewPriority(stats) {
@@ -203,7 +208,9 @@ ${this.generateFileChanges(files)}`;
     generateKeyPoints(files) {
         const points = [];
         // Check for configuration changes
-        if (files.some(f => f.filename.includes('config') || f.filename.endsWith('.json') || f.filename.endsWith('.yml'))) {
+        if (files.some(f => f.filename.includes('config') ||
+            f.filename.endsWith('.json') ||
+            f.filename.endsWith('.yml'))) {
             points.push('- ⚙️ Contains configuration changes - verify environment impact');
         }
         // Check for test files
@@ -225,11 +232,13 @@ ${this.generateFileChanges(files)}`;
         return points.length ? points.join('\n') : '- No significant points to highlight';
     }
     generateDetailedChanges(files) {
-        return files.map(file => {
+        return files
+            .map(file => {
             const changeType = this.getChangeType(file);
             const impact = this.assessFileImpact(file);
             return `### ${file.filename}\n- Type: ${changeType}\n- Impact: ${impact}\n- Changes: +${file.additions}/-${file.deletions}`;
-        }).join('\n\n');
+        })
+            .join('\n\n');
     }
     getChangeType(file) {
         if (file.status === 'added')
@@ -277,10 +286,12 @@ ${this.generateFileChanges(files)}`;
     formatReviewSection(title, comments, fileContent) {
         if (!comments?.length)
             return '';
-        const rows = comments.map(comment => {
+        const rows = comments
+            .map(comment => {
             const context = this.getCodeContext(fileContent, comment.lineNumber);
             return `| ${comment.suggestion} | \`\`\`${fileContent.split('.')[1]}\n${context}\`\`\` |`;
-        }).join('\n');
+        })
+            .join('\n');
         return `
 ### ${title}
 | Issue | Context |

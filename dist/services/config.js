@@ -12,26 +12,26 @@ class ConfigService {
         return {
             languages: {
                 ...config_1.DEFAULT_REVIEW_CONFIG.languages,
-                ...customConfig.languages
+                ...customConfig.languages,
             },
             globalIgnorePatterns: [
                 ...config_1.DEFAULT_REVIEW_CONFIG.globalIgnorePatterns,
-                ...(customConfig.globalIgnorePatterns || [])
+                ...(customConfig.globalIgnorePatterns || []),
             ],
             defaultMaxFileSize: customConfig.defaultMaxFileSize || config_1.DEFAULT_REVIEW_CONFIG.defaultMaxFileSize,
             defaultPrompt: customConfig.defaultPrompt || config_1.DEFAULT_REVIEW_CONFIG.defaultPrompt,
             defaultChecks: [
                 ...config_1.DEFAULT_REVIEW_CONFIG.defaultChecks,
-                ...(customConfig.defaultChecks || [])
-            ]
+                ...(customConfig.defaultChecks || []),
+            ],
         };
     }
     getLanguageConfig(language) {
-        return this.config.languages[language] || {
+        return (this.config.languages[language] || {
             ...config_1.DEFAULT_LANGUAGE_CONFIG,
             fileExtensions: [],
-            ignorePatterns: []
-        };
+            ignorePatterns: [],
+        });
     }
     shouldIgnoreFile(filepath) {
         // Check global ignore patterns
@@ -75,8 +75,10 @@ class ConfigService {
         const customPrompt = languageConfig.customPrompt || this.config.defaultPrompt;
         const additionalChecks = [
             ...this.config.defaultChecks,
-            ...(languageConfig.additionalChecks || [])
-        ].map(check => `- ${check}`).join('\n');
+            ...(languageConfig.additionalChecks || []),
+        ]
+            .map(check => `- ${check}`)
+            .join('\n');
         return customPrompt
             .replace('{language}', language)
             .replace('{code}', code)
@@ -85,7 +87,7 @@ class ConfigService {
     getFilePatterns() {
         return [
             ...this.config.globalIgnorePatterns,
-            ...Object.values(this.config.languages).flatMap(config => config.ignorePatterns)
+            ...Object.values(this.config.languages).flatMap(config => config.ignorePatterns),
         ];
     }
 }
