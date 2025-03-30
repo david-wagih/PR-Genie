@@ -4,10 +4,19 @@ description: 'AI-powered code review assistant for pull requests'
 author: 'david-wagih'
 
 inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+    sensitive: true
+    default: '${{ github.token }}'
   openai-key:
     description: 'OpenAI API key for code review'
     required: true
     sensitive: true
+  pr-number:
+    description: 'Pull request number to review'
+    required: true
+    default: '${{ github.event.pull_request.number }}'
   config-file:
     description: 'Path to custom configuration file (optional)'
     required: false

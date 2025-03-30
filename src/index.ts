@@ -24,6 +24,11 @@ async function run(): Promise<void> {
       throw new ValidationError('This action can only be run on pull request events');
     }
 
+    // Validate pull request number exists
+    if (!context.payload.pull_request?.number) {
+      throw new ValidationError('Pull request number is required');
+    }
+
     // Get and validate inputs
     const inputs = {
       'openai-key': core.getInput('openai-key', { required: true }),
@@ -53,7 +58,7 @@ async function run(): Promise<void> {
           {
             owner: context.repo.owner,
             repo: context.repo.repo,
-            pullNumber: context.payload.pull_request!.number
+            pullNumber: context.payload.pull_request.number
           },
           inputs['config-file'],
           context.sha
@@ -79,7 +84,7 @@ async function run(): Promise<void> {
     const githubContext: GitHubContext = {
       owner: context.repo.owner,
       repo: context.repo.repo,
-      pullNumber: context.payload.pull_request!.number
+      pullNumber: context.payload.pull_request.number
     };
 
     // Get PR details

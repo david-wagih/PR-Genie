@@ -46,18 +46,7 @@ Create a `pr-genie.config.json` file in your repository root to customize the re
       "maxFileSize": 1000,
       "ignorePatterns": ["**/*.test.ts", "**/*.spec.ts"],
       "checks": ["type-safety", "error-handling", "security"]
-    },
-    "python": {
-      "extensions": [".py"],
-      "maxFileSize": 2000,
-      "ignorePatterns": ["**/*_test.py", "**/tests/**"],
-      "checks": ["type-hints", "docstrings", "security"]
     }
-  },
-  "global": {
-    "ignorePatterns": ["**/node_modules/**", "**/dist/**"],
-    "maxFileSize": 5000,
-    "defaultChecks": ["security", "best-practices"]
   }
 }
 ```
@@ -109,4 +98,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Testing
+
+To test the action locally:
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run tests: `npm test`
+
+## Support
+
+For support, please open an issue in the GitHub repository. 

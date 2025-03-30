@@ -48,6 +48,40 @@ export interface ReviewConfig {
   defaultChecks: string[];
 }
 
+export interface OpenAIReviewResponse {
+  estimatedEffort: {
+    score: number;
+    explanation: string;
+  };
+  relevantTests: {
+    exists: boolean;
+    details: string;
+  };
+  possibleIssues: Array<{
+    title: string;
+    description: string;
+    severity: 'high' | 'medium' | 'low';
+    lineNumbers: number[];
+    suggestion: string;
+  }>;
+  securityConcerns: Array<{
+    title: string;
+    description: string;
+    severity: 'high' | 'medium' | 'low';
+    lineNumbers: number[];
+    suggestion: string;
+  }>;
+  codeQuality: {
+    strengths: string[];
+    improvements: Array<{
+      title: string;
+      description: string;
+      lineNumbers: number[];
+      suggestion: string;
+    }>;
+  };
+}
+
 export interface GitHubContext {
   owner: string;
   repo: string;

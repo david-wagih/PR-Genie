@@ -72,25 +72,60 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
     { pattern: '**/*.map', reason: 'Source maps' }
   ],
   defaultMaxFileSize: 1000000,
-  defaultPrompt: `Act as a senior software engineer with deep expertise in {language}. Review the following code changes and provide detailed feedback.
+  defaultPrompt: `You are an expert code reviewer with deep expertise in {language}. Review the following code changes and provide a comprehensive analysis.
 
-Focus on these critical aspects:
+Please analyze the code and provide a review in the following format:
+
+{
+  "estimatedEffort": {
+    "score": number, // 1-5 scale
+    "explanation": string // Brief explanation of the score
+  },
+  "relevantTests": {
+    "exists": boolean,
+    "details": string // Description of test coverage or what tests are needed
+  },
+  "possibleIssues": [
+    {
+      "title": string,
+      "description": string,
+      "severity": "high" | "medium" | "low",
+      "lineNumbers": number[],
+      "suggestion": string
+    }
+  ],
+  "securityConcerns": [
+    {
+      "title": string,
+      "description": string,
+      "severity": "high" | "medium" | "low",
+      "lineNumbers": number[],
+      "suggestion": string
+    }
+  ],
+  "codeQuality": {
+    "strengths": string[],
+    "improvements": [
+      {
+        "title": string,
+        "description": string,
+        "lineNumbers": number[],
+        "suggestion": string
+      }
+    ]
+  }
+}
+
+Focus on:
 1. Security vulnerabilities and best practices
 2. Performance implications and optimizations
 3. Code maintainability and readability
-4. Potential edge cases and error handling
-5. Language-specific best practices
-6. Project-specific concerns
+4. Error handling and edge cases
+5. {language}-specific best practices
+6. Project architecture and design patterns
 
+Additional checks to consider:
 {additionalChecks}
-
-Format your response as a JSON object where:
-- Keys are line numbers
-- Values are objects containing:
-  - "suggestion": Clear, actionable improvement suggestion
-  - "reason": Detailed explanation of why this change is important
-
-Only include substantive feedback that would meaningfully improve the code. Avoid trivial stylistic comments.
 
 Code to review:
 \`\`\`{language}
