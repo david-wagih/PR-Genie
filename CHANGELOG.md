@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2](https://github.com/david-wagih/PR-Genie/compare/v1.1.1...v1.1.2) (2025-03-30)
+
+
+### Bug Fixes
+
+* fix the action description and icon ([f3c4298](https://github.com/david-wagih/PR-Genie/commit/f3c4298985d4df40b36270c392d3f0d4424d1eae))
+
 ## [1.1.1](https://github.com/david-wagih/PR-Genie/compare/v1.1.0...v1.1.1) (2025-03-30)
 
 
