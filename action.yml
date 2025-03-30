@@ -1,5 +1,5 @@
 name: 'PR Genie 🧞'
-description: 'AI-powered code review assistant for GitHub pull requests that provides intelligent code analysis, suggestions, and best practices recommendations.'
+description: 'AI-powered code review assistant for GitHub pull requests.'
 
 author: 'david-wagih'
 
@@ -24,7 +24,7 @@ runs:
   main: 'dist/index.js'
 
 branding:
-  icon: 'magic'
+  icon: 'code'
   color: 'purple'
 
 permissions:
