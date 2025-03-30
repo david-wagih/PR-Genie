@@ -86,4 +86,4 @@ export interface GitHubContext {
   owner: string;
   repo: string;
   pullNumber: number;
-} 
+}

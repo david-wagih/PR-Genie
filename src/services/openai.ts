@@ -9,27 +9,29 @@ export class OpenAIService {
 
   async reviewCode(code: string, prompt: string): Promise<ReviewFeedback> {
     const response = await withRetry(
-      () => fetch(API_ENDPOINTS.OPENAI, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert code reviewer specialized in TypeScript and GitHub Actions. Provide clear, actionable feedback focused on security, performance, and best practices.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.2,
+      () =>
+        fetch(API_ENDPOINTS.OPENAI, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4',
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You are an expert code reviewer specialized in TypeScript and GitHub Actions. Provide clear, actionable feedback focused on security, performance, and best practices.',
+              },
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+            temperature: 0.2,
+          }),
         }),
-      }),
       {
         maxAttempts: DEFAULT_CONFIG.maxRetries,
         delayMs: DEFAULT_CONFIG.retryDelay,
@@ -61,7 +63,7 @@ export class OpenAIService {
         suggestion: concern.title,
         reason: concern.description,
         lineNumber: concern.lineNumbers[0] || 1,
-        context: concern.suggestion
+        context: concern.suggestion,
       }));
     }
 
@@ -71,7 +73,7 @@ export class OpenAIService {
         suggestion: issue.title,
         reason: issue.description,
         lineNumber: issue.lineNumbers[0] || 1,
-        context: issue.suggestion
+        context: issue.suggestion,
       }));
     }
 
@@ -81,7 +83,7 @@ export class OpenAIService {
         suggestion: improvement.title,
         reason: improvement.description,
         lineNumber: improvement.lineNumbers[0] || 1,
-        context: improvement.suggestion
+        context: improvement.suggestion,
       }));
     }
 
@@ -95,21 +97,22 @@ export class OpenAIService {
   generateReviewSummary(reviewErrors: string[]): string {
     let summaryBody = [
       '## 🤖 Code Review Complete\n\n',
-      'I\'ve reviewed the files in this PR and provided inline comments where I found potential improvements. The review focused on:\n\n',
+      "I've reviewed the files in this PR and provided inline comments where I found potential improvements. The review focused on:\n\n",
       '- 🔒 Security best practices\n',
       '- ⚡ Performance optimizations\n',
       '- 📚 Code maintainability\n',
       '- 🎯 Error handling\n',
       '- 📐 Type safety\n',
       '- 🔄 Project-specific concerns\n\n',
-      'Please review the inline comments and let me know if you have any questions!'
+      'Please review the inline comments and let me know if you have any questions!',
     ].join('');
 
     if (reviewErrors.length > 0) {
-      summaryBody += '\n\n### ⚠️ Review Errors\n\nSome files could not be reviewed due to errors:\n\n' +
+      summaryBody +=
+        '\n\n### ⚠️ Review Errors\n\nSome files could not be reviewed due to errors:\n\n' +
         reviewErrors.map(error => `- ${sanitizeInput(error)}`).join('\n');
     }
 
     return summaryBody;
   }
-} 
+}

@@ -12,7 +12,7 @@ for (let i = 0; i < data.length; i++) {
 }
 
 // Type safety issue: Missing type annotations
-function processData(input : number) {
+function processData(input: number) {
   return input * 2;
 }
 
@@ -48,10 +48,10 @@ const MAX_RETRIES = 3;
 const TIMEOUT = 5000;
 
 // Code style issue: Inconsistent formatting
-const   spaces   =   "too many spaces";
-const noSpaces="no spaces around operator";
+const spaces = 'too many spaces';
+const noSpaces = 'no spaces around operator';
 
 // Documentation issue: Missing JSDoc
 function calculateTotal(items: { price: number }[]) {
   return items.reduce((sum: number, item: { price: number }) => sum + item.price, 0);
-} 
+}

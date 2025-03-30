@@ -13,27 +13,30 @@ export class ConfigService {
     return {
       languages: {
         ...DEFAULT_REVIEW_CONFIG.languages,
-        ...customConfig.languages
+        ...customConfig.languages,
       },
       globalIgnorePatterns: [
         ...DEFAULT_REVIEW_CONFIG.globalIgnorePatterns,
-        ...(customConfig.globalIgnorePatterns || [])
+        ...(customConfig.globalIgnorePatterns || []),
       ],
-      defaultMaxFileSize: customConfig.defaultMaxFileSize || DEFAULT_REVIEW_CONFIG.defaultMaxFileSize,
+      defaultMaxFileSize:
+        customConfig.defaultMaxFileSize || DEFAULT_REVIEW_CONFIG.defaultMaxFileSize,
       defaultPrompt: customConfig.defaultPrompt || DEFAULT_REVIEW_CONFIG.defaultPrompt,
       defaultChecks: [
         ...DEFAULT_REVIEW_CONFIG.defaultChecks,
-        ...(customConfig.defaultChecks || [])
-      ]
+        ...(customConfig.defaultChecks || []),
+      ],
     };
   }
 
   getLanguageConfig(language: string): LanguageConfig {
-    return this.config.languages[language] || {
-      ...DEFAULT_LANGUAGE_CONFIG,
-      fileExtensions: [],
-      ignorePatterns: []
-    };
+    return (
+      this.config.languages[language] || {
+        ...DEFAULT_LANGUAGE_CONFIG,
+        fileExtensions: [],
+        ignorePatterns: [],
+      }
+    );
   }
 
   shouldIgnoreFile(filepath: string): boolean {
@@ -82,11 +85,13 @@ export class ConfigService {
   getReviewPrompt(language: string, code: string): string {
     const languageConfig = this.getLanguageConfig(language);
     const customPrompt = languageConfig.customPrompt || this.config.defaultPrompt;
-    
+
     const additionalChecks = [
       ...this.config.defaultChecks,
-      ...(languageConfig.additionalChecks || [])
-    ].map(check => `- ${check}`).join('\n');
+      ...(languageConfig.additionalChecks || []),
+    ]
+      .map(check => `- ${check}`)
+      .join('\n');
 
     return customPrompt
       .replace('{language}', language)
@@ -97,7 +102,7 @@ export class ConfigService {
   getFilePatterns(): FilePattern[] {
     return [
       ...this.config.globalIgnorePatterns,
-      ...Object.values(this.config.languages).flatMap(config => config.ignorePatterns)
+      ...Object.values(this.config.languages).flatMap(config => config.ignorePatterns),
     ];
   }
-} 
+}

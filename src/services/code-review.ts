@@ -45,7 +45,11 @@ export class CodeReviewService {
           validateFileType(file.filename, languageConfig.fileExtensions);
 
           // Get the file content
-          const { data } = await this.githubService.getFileContent(context, file.filename, file.sha);
+          const { data } = await this.githubService.getFileContent(
+            context,
+            file.filename,
+            file.sha
+          );
 
           // Handle the response which can be a single file or an array
           if (Array.isArray(data) || !('content' in data)) {
@@ -55,14 +59,14 @@ export class CodeReviewService {
 
           // Prepare the content for review
           const fileContent = Buffer.from(data.content, 'base64').toString();
-          
+
           // Validate file size
           const maxFileSize = this.configService.getMaxFileSize(file.filename);
           validateFileSize(fileContent, maxFileSize);
-          
+
           // Sanitize code content
           const sanitizedContent = sanitizeCodeContent(fileContent);
-          
+
           // Get review from OpenAI with language-specific prompt
           const review = await this.openAIService.reviewCode(
             sanitizedContent,
@@ -72,12 +76,13 @@ export class CodeReviewService {
           // Generate and post the review comment with file content for context
           const reviewComment = this.githubService.generateReviewComment(file, review, fileContent);
           await this.githubService.createComment(context, reviewComment);
-
         } catch (error) {
           if (error instanceof FileProcessingError) {
             reviewErrors.push(`Error processing ${file.filename}: ${error.message}`);
           } else {
-            reviewErrors.push(`Unexpected error processing ${file.filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            reviewErrors.push(
+              `Unexpected error processing ${file.filename}: ${error instanceof Error ? error.message : 'Unknown error'}`
+            );
           }
         }
       }
@@ -87,9 +92,8 @@ export class CodeReviewService {
         const errorComment = `## ⚠️ Review Errors\n\n${reviewErrors.map(error => `- ${error}`).join('\n')}`;
         await this.githubService.createComment(context, errorComment);
       }
-
     } catch (error) {
       throw error;
     }
   }
-} 
+}

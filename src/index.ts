@@ -3,11 +3,7 @@ import * as github from '@actions/github';
 import { Octokit } from '@octokit/rest';
 import { PRGenieError, ValidationError } from './core/errors';
 import { isRateLimitError, isNetworkError } from './utils/retry';
-import { 
-  validateGitHubToken, 
-  validateOpenAIToken, 
-  sanitizeInput 
-} from './utils/security';
+import { validateGitHubToken, validateOpenAIToken, sanitizeInput } from './utils/security';
 import { GitHubService } from './services/github';
 import { OpenAIService } from './services/openai';
 import { CodeReviewService } from './services/code-review';
@@ -32,7 +28,7 @@ async function run(): Promise<void> {
     // Get and validate inputs
     const inputs = {
       'openai-key': core.getInput('openai-key', { required: true }),
-      'config-file': core.getInput('config-file', { required: false })
+      'config-file': core.getInput('config-file', { required: false }),
     };
 
     // Validate and sanitize tokens
@@ -58,12 +54,12 @@ async function run(): Promise<void> {
           {
             owner: context.repo.owner,
             repo: context.repo.repo,
-            pullNumber: context.payload.pull_request.number
+            pullNumber: context.payload.pull_request.number,
           },
           inputs['config-file'],
           context.sha
         );
-        
+
         if ('content' in configContent.data) {
           const config = JSON.parse(Buffer.from(configContent.data.content, 'base64').toString());
           configService = new ConfigService(config);
@@ -84,7 +80,7 @@ async function run(): Promise<void> {
     const githubContext: GitHubContext = {
       owner: context.repo.owner,
       repo: context.repo.repo,
-      pullNumber: context.payload.pull_request.number
+      pullNumber: context.payload.pull_request.number,
     };
 
     // Get PR details
@@ -106,7 +102,6 @@ async function run(): Promise<void> {
     core.setOutput('additions', stats.additions);
     core.setOutput('deletions', stats.deletions);
     core.setOutput('total_changes', stats.changes);
-
   } catch (error) {
     if (error instanceof PRGenieError) {
       core.setFailed(`[${error.code}] ${error.message}`);
@@ -124,4 +119,4 @@ async function run(): Promise<void> {
   }
 }
 
-run(); 
+run();

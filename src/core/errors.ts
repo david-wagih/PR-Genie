@@ -1,5 +1,8 @@
 export class PRGenieError extends Error {
-  constructor(message: string, public readonly code: string) {
+  constructor(
+    message: string,
+    public readonly code: string
+  ) {
     super(message);
     this.name = 'PRGenieError';
   }
@@ -27,7 +30,10 @@ export class ValidationError extends PRGenieError {
 }
 
 export class FileProcessingError extends PRGenieError {
-  constructor(message: string, public readonly filename: string) {
+  constructor(
+    message: string,
+    public readonly filename: string
+  ) {
     super(message, 'FILE_PROCESSING_ERROR');
     this.name = 'FileProcessingError';
   }
@@ -38,4 +44,4 @@ export class SecurityError extends PRGenieError {
     super(message, 'SECURITY_ERROR');
     this.name = 'SecurityError';
   }
-} 
+}

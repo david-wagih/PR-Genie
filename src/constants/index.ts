@@ -36,7 +36,8 @@ export const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Network error occurred. Please check your connection and try again.',
   INVALID_TOKEN: 'Invalid token format',
   FILE_TOO_LARGE: (size: number) => `File size exceeds maximum allowed size of ${size / 1000}KB`,
-  FILE_TYPE_NOT_ALLOWED: (types: string[]) => `File type not allowed. Allowed types: ${types.join(', ')}`,
+  FILE_TYPE_NOT_ALLOWED: (types: string[]) =>
+    `File type not allowed. Allowed types: ${types.join(', ')}`,
   INVALID_FILE_SIZE: 'Invalid file size',
   INVALID_FILE_TYPE: 'Invalid file type',
   INVALID_GITHUB_TOKEN: 'Invalid GitHub token format',

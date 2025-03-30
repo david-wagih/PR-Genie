@@ -1,4 +1,4 @@
-import { SecurityError } from "../core/errors";
+import { SecurityError } from '../core/errors';
 
 export function sanitizeInput(input: string): string {
   // Remove any potential HTML/script injection
@@ -21,7 +21,9 @@ export function validateFileSize(content: string, maxSizeBytes: number = 1000000
 export function validateFileType(filename: string, allowedExtensions: string[]): void {
   const extension = filename.split('.').pop()?.toLowerCase();
   if (!extension || !allowedExtensions.includes(extension)) {
-    throw new SecurityError(`File type not allowed. Allowed types: ${allowedExtensions.join(', ')}`);
+    throw new SecurityError(
+      `File type not allowed. Allowed types: ${allowedExtensions.join(', ')}`
+    );
   }
 }
 
@@ -45,4 +47,4 @@ export function validateOpenAIToken(token: string): void {
   if (!token.startsWith('sk-')) {
     throw new SecurityError('Invalid OpenAI token format');
   }
-} 
+}

@@ -1,5 +1,11 @@
 import { Octokit } from '@octokit/rest';
-import { PullRequestFile, PullRequestStats, GitHubContext, ReviewFeedback, ReviewComment } from '../types';
+import {
+  PullRequestFile,
+  PullRequestStats,
+  GitHubContext,
+  ReviewFeedback,
+  ReviewComment,
+} from '../types';
 import { withRetry } from '../utils/retry';
 import { DEFAULT_CONFIG } from '../constants';
 import { sanitizeInput } from '../utils/security';
@@ -9,11 +15,12 @@ export class GitHubService {
 
   async getPullRequest(context: GitHubContext) {
     return withRetry(
-      () => this.octokit.rest.pulls.get({
-        owner: context.owner,
-        repo: context.repo,
-        pull_number: context.pullNumber,
-      }),
+      () =>
+        this.octokit.rest.pulls.get({
+          owner: context.owner,
+          repo: context.repo,
+          pull_number: context.pullNumber,
+        }),
       {
         maxAttempts: DEFAULT_CONFIG.maxRetries,
         delayMs: DEFAULT_CONFIG.retryDelay,
@@ -24,11 +31,12 @@ export class GitHubService {
 
   async getPullRequestFiles(context: GitHubContext) {
     return withRetry(
-      () => this.octokit.rest.pulls.listFiles({
-        owner: context.owner,
-        repo: context.repo,
-        pull_number: context.pullNumber,
-      }),
+      () =>
+        this.octokit.rest.pulls.listFiles({
+          owner: context.owner,
+          repo: context.repo,
+          pull_number: context.pullNumber,
+        }),
       {
         maxAttempts: DEFAULT_CONFIG.maxRetries,
         delayMs: DEFAULT_CONFIG.retryDelay,
@@ -39,12 +47,13 @@ export class GitHubService {
 
   async getFileContent(context: GitHubContext, path: string, sha: string) {
     return withRetry(
-      () => this.octokit.rest.repos.getContent({
-        owner: context.owner,
-        repo: context.repo,
-        path,
-        ref: sha,
-      }),
+      () =>
+        this.octokit.rest.repos.getContent({
+          owner: context.owner,
+          repo: context.repo,
+          path,
+          ref: sha,
+        }),
       {
         maxAttempts: DEFAULT_CONFIG.maxRetries,
         delayMs: DEFAULT_CONFIG.retryDelay,
@@ -53,19 +62,23 @@ export class GitHubService {
     );
   }
 
-  async createReviewComment(context: GitHubContext, params: {
-    body: string;
-    commit_id: string;
-    path: string;
-    line: number;
-  }) {
+  async createReviewComment(
+    context: GitHubContext,
+    params: {
+      body: string;
+      commit_id: string;
+      path: string;
+      line: number;
+    }
+  ) {
     return withRetry(
-      () => this.octokit.rest.pulls.createReviewComment({
-        owner: context.owner,
-        repo: context.repo,
-        pull_number: context.pullNumber,
-        ...params,
-      }),
+      () =>
+        this.octokit.rest.pulls.createReviewComment({
+          owner: context.owner,
+          repo: context.repo,
+          pull_number: context.pullNumber,
+          ...params,
+        }),
       {
         maxAttempts: DEFAULT_CONFIG.maxRetries,
         delayMs: DEFAULT_CONFIG.retryDelay,
@@ -76,12 +89,13 @@ export class GitHubService {
 
   async createComment(context: GitHubContext, body: string) {
     return withRetry(
-      () => this.octokit.rest.issues.createComment({
-        owner: context.owner,
-        repo: context.repo,
-        issue_number: context.pullNumber,
-        body,
-      }),
+      () =>
+        this.octokit.rest.issues.createComment({
+          owner: context.owner,
+          repo: context.repo,
+          issue_number: context.pullNumber,
+          body,
+        }),
       {
         maxAttempts: DEFAULT_CONFIG.maxRetries,
         delayMs: DEFAULT_CONFIG.retryDelay,
@@ -91,12 +105,15 @@ export class GitHubService {
   }
 
   calculatePullRequestStats(files: PullRequestFile[]): PullRequestStats {
-    return files.reduce((stats, file) => ({
-      totalFiles: stats.totalFiles + 1,
-      additions: stats.additions + file.additions,
-      deletions: stats.deletions + file.deletions,
-      changes: stats.changes + file.changes,
-    }), { totalFiles: 0, additions: 0, deletions: 0, changes: 0 });
+    return files.reduce(
+      (stats, file) => ({
+        totalFiles: stats.totalFiles + 1,
+        additions: stats.additions + file.additions,
+        deletions: stats.deletions + file.deletions,
+        changes: stats.changes + file.changes,
+      }),
+      { totalFiles: 0, additions: 0, deletions: 0, changes: 0 }
+    );
   }
 
   generateSummary(stats: PullRequestStats, files: PullRequestFile[]): string {
@@ -128,43 +145,51 @@ ${this.generateFileChanges(files)}`;
   }
 
   private estimateReviewEffort(stats: PullRequestStats): string {
-    const score = Math.min(5, Math.ceil((stats.changes / 100) + (stats.totalFiles / 3)));
+    const score = Math.min(5, Math.ceil(stats.changes / 100 + stats.totalFiles / 3));
     return `${score}`;
   }
 
   private explainReviewEffort(stats: PullRequestStats, files: PullRequestFile[]): string {
     const reasons = [];
-    
+
     if (stats.changes > 200) {
-      reasons.push("large number of changes");
+      reasons.push('large number of changes');
     }
     if (stats.totalFiles > 5) {
-      reasons.push("multiple files affected");
+      reasons.push('multiple files affected');
     }
-    if (files.some(f => f.filename.includes('config') || f.filename.endsWith('.json') || f.filename.endsWith('.yml'))) {
-      reasons.push("configuration changes require careful review");
+    if (
+      files.some(
+        f =>
+          f.filename.includes('config') ||
+          f.filename.endsWith('.json') ||
+          f.filename.endsWith('.yml')
+      )
+    ) {
+      reasons.push('configuration changes require careful review');
     }
     if (files.some(f => f.changes > 100)) {
-      reasons.push("contains large file changes");
+      reasons.push('contains large file changes');
     }
 
     if (reasons.length === 0) {
-      return "because the changes are straightforward and well-contained.";
+      return 'because the changes are straightforward and well-contained.';
     }
 
-    return `because of ${reasons.join(", ")}.`;
+    return `because of ${reasons.join(', ')}.`;
   }
 
   private checkRelevantTests(files: PullRequestFile[]): string {
-    const testFiles = files.filter(f => 
-      f.filename.includes('test') || 
-      f.filename.includes('spec') || 
-      f.filename.endsWith('.test.ts') || 
-      f.filename.endsWith('.spec.ts')
+    const testFiles = files.filter(
+      f =>
+        f.filename.includes('test') ||
+        f.filename.includes('spec') ||
+        f.filename.endsWith('.test.ts') ||
+        f.filename.endsWith('.spec.ts')
     );
 
     if (testFiles.length === 0) {
-      return "No test files were modified. Consider adding tests for the changes.";
+      return 'No test files were modified. Consider adding tests for the changes.';
     }
 
     return `Yes - ${testFiles.map(f => f.filename).join(', ')}`;
@@ -175,61 +200,70 @@ ${this.generateFileChanges(files)}`;
 
     // Check for large files without tests
     if (files.some(f => f.changes > 100) && !files.some(f => f.filename.includes('test'))) {
-      issues.push("Large code changes without corresponding test updates");
+      issues.push('Large code changes without corresponding test updates');
     }
 
     // Check for configuration changes
     if (files.some(f => f.filename.includes('config'))) {
-      issues.push("Configuration changes may impact environment behavior");
+      issues.push('Configuration changes may impact environment behavior');
     }
 
     // Check for dependency changes
     if (files.some(f => f.filename.includes('package.json'))) {
-      issues.push("Dependency changes may introduce compatibility issues");
+      issues.push('Dependency changes may introduce compatibility issues');
     }
 
     // Check for type definition changes
     if (files.some(f => f.filename.endsWith('.d.ts'))) {
-      issues.push("Type definition changes may affect dependent code");
+      issues.push('Type definition changes may affect dependent code');
     }
 
-    return issues.length > 0 ? issues.join('\n') : "No significant issues identified";
+    return issues.length > 0 ? issues.join('\n') : 'No significant issues identified';
   }
 
   private identifySecurityConcerns(files: PullRequestFile[]): string {
     const concerns = [];
 
     // Check for security-sensitive files
-    if (files.some(f => 
-      f.filename.includes('auth') || 
-      f.filename.includes('security') || 
-      f.filename.includes('password') ||
-      f.filename.includes('token') ||
-      f.filename.includes('secret')
-    )) {
-      concerns.push("Changes to security-sensitive components");
+    if (
+      files.some(
+        f =>
+          f.filename.includes('auth') ||
+          f.filename.includes('security') ||
+          f.filename.includes('password') ||
+          f.filename.includes('token') ||
+          f.filename.includes('secret')
+      )
+    ) {
+      concerns.push('Changes to security-sensitive components');
     }
 
     // Check for configuration files that might contain secrets
-    if (files.some(f => 
-      f.filename.endsWith('.env') || 
-      f.filename.includes('config') && (f.filename.endsWith('.json') || f.filename.endsWith('.yml'))
-    )) {
-      concerns.push("Modified configuration files - verify no secrets are exposed");
+    if (
+      files.some(
+        f =>
+          f.filename.endsWith('.env') ||
+          (f.filename.includes('config') &&
+            (f.filename.endsWith('.json') || f.filename.endsWith('.yml')))
+      )
+    ) {
+      concerns.push('Modified configuration files - verify no secrets are exposed');
     }
 
-    return concerns.length > 0 ? concerns.join('\n') : "No immediate security concerns identified";
+    return concerns.length > 0 ? concerns.join('\n') : 'No immediate security concerns identified';
   }
 
   private generateFileChanges(files: PullRequestFile[]): string {
-    return files.map(file => {
-      const changeType = this.getChangeType(file);
-      return `- ${file.filename} (+${file.additions}/-${file.deletions})`;
-    }).join('\n');
+    return files
+      .map(file => {
+        const changeType = this.getChangeType(file);
+        return `- ${file.filename} (+${file.additions}/-${file.deletions})`;
+      })
+      .join('\n');
   }
 
   calculateComplexityScore(stats: PullRequestStats): string {
-    const score = Math.min(10, Math.ceil((stats.changes / 100) + (stats.totalFiles / 3)));
+    const score = Math.min(10, Math.ceil(stats.changes / 100 + stats.totalFiles / 3));
     return `${score}/10`;
   }
 
@@ -256,9 +290,16 @@ ${this.generateFileChanges(files)}`;
 
   generateKeyPoints(files: PullRequestFile[]): string {
     const points = [];
-    
+
     // Check for configuration changes
-    if (files.some(f => f.filename.includes('config') || f.filename.endsWith('.json') || f.filename.endsWith('.yml'))) {
+    if (
+      files.some(
+        f =>
+          f.filename.includes('config') ||
+          f.filename.endsWith('.json') ||
+          f.filename.endsWith('.yml')
+      )
+    ) {
       points.push('- ⚙️ Contains configuration changes - verify environment impact');
     }
 
@@ -268,7 +309,11 @@ ${this.generateFileChanges(files)}`;
     }
 
     // Check for dependency changes
-    if (files.some(f => f.filename.includes('package.json') || f.filename.includes('requirements.txt'))) {
+    if (
+      files.some(
+        f => f.filename.includes('package.json') || f.filename.includes('requirements.txt')
+      )
+    ) {
       points.push('- 📦 Dependencies have been modified');
     }
 
@@ -286,11 +331,13 @@ ${this.generateFileChanges(files)}`;
   }
 
   generateDetailedChanges(files: PullRequestFile[]): string {
-    return files.map(file => {
-      const changeType = this.getChangeType(file);
-      const impact = this.assessFileImpact(file);
-      return `### ${file.filename}\n- Type: ${changeType}\n- Impact: ${impact}\n- Changes: +${file.additions}/-${file.deletions}`;
-    }).join('\n\n');
+    return files
+      .map(file => {
+        const changeType = this.getChangeType(file);
+        const impact = this.assessFileImpact(file);
+        return `### ${file.filename}\n- Type: ${changeType}\n- Impact: ${impact}\n- Changes: +${file.additions}/-${file.deletions}`;
+      })
+      .join('\n\n');
   }
 
   getChangeType(file: PullRequestFile): string {
@@ -333,10 +380,10 @@ ${this.generateFileChanges(files)}`;
     const lines = content.split('\n');
     const start = Math.max(0, lineNumber - contextLines - 1);
     const end = Math.min(lines.length, lineNumber + contextLines);
-    
+
     const relevantLines = lines.slice(start, end);
     const lineNumbers = Array.from({ length: end - start }, (_, i) => start + i + 1);
-    
+
     return relevantLines
       .map((line: string, i: number) => `${lineNumbers[i].toString().padStart(3, ' ')} | ${line}`)
       .join('\n');
@@ -345,10 +392,12 @@ ${this.generateFileChanges(files)}`;
   formatReviewSection(title: string, comments: ReviewComment[], fileContent: string): string {
     if (!comments?.length) return '';
 
-    const rows = comments.map(comment => {
-      const context = this.getCodeContext(fileContent, comment.lineNumber);
-      return `| ${comment.suggestion} | \`\`\`${fileContent.split('.')[1]}\n${context}\`\`\` |`;
-    }).join('\n');
+    const rows = comments
+      .map(comment => {
+        const context = this.getCodeContext(fileContent, comment.lineNumber);
+        return `| ${comment.suggestion} | \`\`\`${fileContent.split('.')[1]}\n${context}\`\`\` |`;
+      })
+      .join('\n');
 
     return `
 ### ${title}
@@ -357,11 +406,17 @@ ${this.generateFileChanges(files)}`;
 ${rows}`;
   }
 
-  generateReviewComment(file: PullRequestFile, review: ReviewFeedback, fileContent: string): string {
+  generateReviewComment(
+    file: PullRequestFile,
+    review: ReviewFeedback,
+    fileContent: string
+  ): string {
     const sections = [];
 
     // Add file header with change statistics
-    sections.push(`## 📝 Review for \`${file.filename}\` (${file.additions}+/${file.deletions}-)\n`);
+    sections.push(
+      `## 📝 Review for \`${file.filename}\` (${file.additions}+/${file.deletions}-)\n`
+    );
 
     // Add each section with context
     if (review.security?.length) {
@@ -369,15 +424,21 @@ ${rows}`;
     }
 
     if (review.performance?.length) {
-      sections.push(this.formatReviewSection('⚡ Performance Issues', review.performance, fileContent));
+      sections.push(
+        this.formatReviewSection('⚡ Performance Issues', review.performance, fileContent)
+      );
     }
 
     if (review.bestPractices?.length) {
-      sections.push(this.formatReviewSection('🎯 Best Practices', review.bestPractices, fileContent));
+      sections.push(
+        this.formatReviewSection('🎯 Best Practices', review.bestPractices, fileContent)
+      );
     }
 
     if (review.improvements?.length) {
-      sections.push(this.formatReviewSection('💡 Suggested Improvements', review.improvements, fileContent));
+      sections.push(
+        this.formatReviewSection('💡 Suggested Improvements', review.improvements, fileContent)
+      );
     }
 
     if (review.issues?.length) {
@@ -390,4 +451,4 @@ ${rows}`;
   calculateFileStats(file: PullRequestFile): string {
     return `- Changes: ${file.changes} lines (${file.additions} additions, ${file.deletions} deletions)`;
   }
-} 
+}

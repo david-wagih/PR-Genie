@@ -4,10 +4,7 @@ export interface RetryOptions {
   backoffFactor?: number;
 }
 
-export async function withRetry<T>(
-  operation: () => Promise<T>,
-  options: RetryOptions
-): Promise<T> {
+export async function withRetry<T>(operation: () => Promise<T>, options: RetryOptions): Promise<T> {
   let lastError: Error | null = null;
   let delay = options.delayMs;
 
@@ -16,14 +13,14 @@ export async function withRetry<T>(
       return await operation();
     } catch (error) {
       lastError = error as Error;
-      
+
       if (attempt === options.maxAttempts) {
         break;
       }
 
       // Wait before retrying
       await new Promise(resolve => setTimeout(resolve, delay));
-      
+
       // Increase delay for next attempt if backoff is enabled
       if (options.backoffFactor) {
         delay *= options.backoffFactor;
@@ -40,4 +37,4 @@ export function isRateLimitError(error: any): boolean {
 
 export function isNetworkError(error: any): boolean {
   return error?.code === 'ECONNRESET' || error?.code === 'ETIMEDOUT';
-} 
+}
