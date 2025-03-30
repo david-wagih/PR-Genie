@@ -5,19 +5,20 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -26,6 +27,26 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Create Release PR
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          release-type: node
+          package-name: pr-genie
+          token: ${{ secrets.RELEASE_TOKEN }}
+          
+      - name: Create GitHub Release
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release.outputs.tag_name }}
+          name: Release ${{ steps.release.outputs.tag_name }}
+          body: ${{ steps.release.outputs.body }}
+          draft: false
+          prerelease: false
 
       - name: Configure Git
         run: |
@@ -56,34 +77,6 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Create Release Pull Request or Publish
-        id: release
-        uses: google-github-actions/release-please-action@v4
-        with:
-          release-type: node
-          package-name: "pr-genie"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Create GitHub Release
-        if: ${{ steps.release.outputs.release_created }}
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.bump_version.outputs.new_version }}
-          name: Release v${{ steps.bump_version.outputs.new_version }}
-          body: |
-            ## What's Changed
-            ${{ steps.release.outputs.changelog }}
-            
-            ## Installation
-            ```bash
-            npm install pr-genie
-            ```
-            
-            For detailed usage instructions, see the [documentation](./README.md).
-          draft: false
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and Push Changes
         run: |
