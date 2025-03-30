@@ -17,6 +17,7 @@ jobs:
       - name: Run PR Genie
         uses: ./ # Uses the action in the root directory
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           openai-key: ${{ secrets.OPENAI_API_KEY }}
           config-file: pr-genie.config.json  # Optional config file
 
