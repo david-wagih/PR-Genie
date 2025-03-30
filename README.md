@@ -1,80 +1,107 @@
-# PR Analysis Action
+# PR Genie 🤖
 
-📊 A GitHub Action that provides detailed analysis of pull requests, helping teams understand the scope and impact of changes.
+An AI-powered code review assistant for GitHub pull requests that provides intelligent code analysis, suggestions, and best practices recommendations.
 
 ## Features
 
-- 📁 Counts the number of files changed
-- ✨ Calculates lines added and removed
-- 📈 Provides a detailed breakdown of changes per file
-- 💬 Posts results as a comment on the PR
-- 🔄 Updates on PR synchronization
-
-## Example Output
-
-```markdown
-## 📊 Pull Request Analysis
-
-### Overview
-- 📁 Files changed: 3
-- ✨ Lines added: 150
-- 🗑️ Lines removed: 50
-- 📈 Total changes: 200
-
-### Files Changed
-- `src/index.ts` (+100/-30)
-- `README.md` (+40/-15)
-- `package.json` (+10/-5)
-```
+- 🤖 AI-powered code review using OpenAI's GPT models
+- 📊 Detailed PR statistics and change analysis
+- 🔍 Smart file filtering and language-specific reviews
+- ⚙️ Customizable configuration through `pr-genie.config.json`
+- 🔒 Secure handling of API keys and sensitive data
+- 🌐 Support for multiple programming languages
+- 📝 Automated PR summaries and comments
 
 ## Usage
 
-Add this to your workflow file:
+Add the following to your workflow file (`.github/workflows/pr-review.yml`):
 
 ```yaml
-name: PR Analysis
+name: PR Review
 on:
   pull_request:
-    types: [opened, synchronize]
-
-permissions:
-  pull-requests: write  # Required for posting comments
-  contents: read       # Required for reading PR content
+    types: [opened, synchronize, reopened]
 
 jobs:
-  analyze:
+  review:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run PR Analysis
-        uses: david-wagih/pr-analysis-action@v1
+      - name: PR Genie Review
+        uses: david-wagih/PR-Genie@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          pr-number: ${{ github.event.pull_request.number }}
+          openai-key: ${{ secrets.OPENAI_API_KEY }}
+          config-file: pr-genie.config.json  # Optional
 ```
 
-## Inputs
+## Configuration
 
-| Name | Description | Required | Default |
-|------|-------------|----------|---------|
-| `github-token` | GitHub token for API access | Yes | N/A |
-| `pr-number` | Pull request number to analyze | Yes | N/A |
+Create a `pr-genie.config.json` file in your repository root to customize the review process:
+
+```json
+{
+  "languages": {
+    "typescript": {
+      "extensions": [".ts", ".tsx"],
+      "maxFileSize": 1000,
+      "ignorePatterns": ["**/*.test.ts", "**/*.spec.ts"],
+      "checks": ["type-safety", "error-handling", "security"]
+    },
+    "python": {
+      "extensions": [".py"],
+      "maxFileSize": 2000,
+      "ignorePatterns": ["**/*_test.py", "**/tests/**"],
+      "checks": ["type-hints", "docstrings", "security"]
+    }
+  },
+  "global": {
+    "ignorePatterns": ["**/node_modules/**", "**/dist/**"],
+    "maxFileSize": 5000,
+    "defaultChecks": ["security", "best-practices"]
+  }
+}
+```
+
+### Configuration Options
+
+#### Language-Specific Settings
+- `extensions`: File extensions to include
+- `maxFileSize`: Maximum file size in KB to review
+- `ignorePatterns`: Glob patterns to ignore
+- `checks`: Specific checks to perform
+
+#### Global Settings
+- `ignorePatterns`: Global patterns to ignore
+- `maxFileSize`: Default maximum file size
+- `defaultChecks`: Default checks to perform
+
+## Security
+
+- 🔒 Uses GitHub Secrets for API keys
+- 🔐 Minimal permissions required
+- 🛡️ Prevents execution on forked repositories
+- 🔍 Input validation and sanitization
+- 🚫 Rate limiting protection
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| `total_files` | Number of files changed |
-| `additions` | Number of lines added |
-| `deletions` | Number of lines removed |
-| `total_changes` | Total number of changes |
+The action provides the following outputs:
+- `total_files`: Total number of files reviewed
+- `additions`: Total number of lines added
+- `deletions`: Total number of lines deleted
+- `total_changes`: Total number of lines changed
 
-## Use Cases
+## Requirements
 
-- 🔍 Quick assessment of PR size and complexity
-- 📈 Tracking changes across multiple files
-- 📊 Generating PR statistics for team metrics
-- 🤖 Automated PR review workflows
+- Node.js 20 or later
+- GitHub Actions
+- OpenAI API key
+
+## Permissions
+
+The action requires the following permissions:
+- `contents: read` - To read repository contents
+- `pull-requests: write` - To post review comments
 
 ## Contributing
 
@@ -82,4 +109,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT © [david-wagih] 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 

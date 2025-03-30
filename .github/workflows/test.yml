@@ -1,21 +1,29 @@
-name: Test PR Analysis Action
+name: Test PR Genie
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 permissions:
   pull-requests: write
   contents: read
 
 jobs:
-  analyze:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Run PR Analysis
+      - name: Run PR Genie
         uses: ./ # Uses the action in the root directory
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          pr-number: ${{ github.event.pull_request.number }} 
+          openai-key: ${{ secrets.OPENAI_API_KEY }}
+          config-file: pr-genie.config.json  # Optional config file
+
+      # Add a test step to verify the action outputs
+      - name: Verify Action Outputs
+        run: |
+          echo "Total files: ${{ steps.pr-genie.outputs.total_files }}"
+          echo "Additions: ${{ steps.pr-genie.outputs.additions }}"
+          echo "Deletions: ${{ steps.pr-genie.outputs.deletions }}"
+          echo "Total changes: ${{ steps.pr-genie.outputs.total_changes }}" 

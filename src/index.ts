@@ -1,83 +1,118 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
-import { reviewPullRequest } from './code-review';
 import { Octokit } from '@octokit/rest';
-
-type PullRequestFile = RestEndpointMethodTypes['pulls']['listFiles']['response']['data'][0];
+import { PRGenieError, ValidationError } from './core/errors';
+import { isRateLimitError, isNetworkError } from './utils/retry';
+import { 
+  validateGitHubToken, 
+  validateOpenAIToken, 
+  sanitizeInput 
+} from './utils/security';
+import { GitHubService } from './services/github';
+import { OpenAIService } from './services/openai';
+import { CodeReviewService } from './services/code-review';
+import { ConfigService } from './services/config';
+import { GitHubContext } from './types';
 
 async function run(): Promise<void> {
   try {
-    // Get inputs
-    const token = core.getInput('github-token', { required: true });
-    const prNumber = parseInt(core.getInput('pr-number', { required: true }));
-    const openAIKey = core.getInput('openai-key', { required: true });
-
-    // Create octokit client
-    const octokit = github.getOctokit(token);
+    // Get the event context
     const context = github.context;
 
-    // Get PR details
-    const { data: pr } = await octokit.rest.pulls.get({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      pull_number: prNumber,
-    });
-
-    // Get PR files
-    const { data: files } = await octokit.rest.pulls.listFiles({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      pull_number: prNumber,
-    });
-
-    // Calculate statistics
-    const totalFiles = files.length;
-    const additions = files.reduce((sum: number, file: PullRequestFile) => sum + file.additions, 0);
-    const deletions = files.reduce((sum: number, file: PullRequestFile) => sum + file.deletions, 0);
-    const changes = additions + deletions;
-
-    // Generate summary
-    const summary = [
-      '## 📊 Pull Request Analysis',
-      '',
-      `### Overview`,
-      `- 📁 Files changed: ${totalFiles}`,
-      `- ✨ Lines added: ${additions}`,
-      `- 🗑️ Lines removed: ${deletions}`,
-      `- 📈 Total changes: ${changes}`,
-      '',
-      '### Files Changed',
-      ...files.map((file: PullRequestFile) => `- \`${file.filename}\` (+${file.additions}/-${file.deletions})`),
-    ].join('\n');
-
-    // Post initial statistics comment
-    await octokit.rest.issues.createComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: prNumber,
-      body: summary,
-    });
-
-    // Perform code review if OpenAI key is provided
-    if (openAIKey) {
-      await reviewPullRequest(
-        octokit as unknown as Octokit,
-        context.repo.owner,
-        context.repo.repo,
-        prNumber,
-        openAIKey
-      );
+    // Validate that we're running on a pull request
+    if (context.eventName !== 'pull_request') {
+      throw new ValidationError('This action can only be run on pull request events');
     }
 
-    core.setOutput('total_files', totalFiles);
-    core.setOutput('additions', additions);
-    core.setOutput('deletions', deletions);
-    core.setOutput('total_changes', changes);
+    // Get and validate inputs
+    const inputs = {
+      'openai-key': core.getInput('openai-key', { required: true }),
+      'config-file': core.getInput('config-file', { required: false })
+    };
+
+    // Validate and sanitize tokens
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      throw new ValidationError('GitHub token is required');
+    }
+    validateGitHubToken(token);
+
+    const openAIKey = sanitizeInput(inputs['openai-key']);
+    validateOpenAIToken(openAIKey);
+
+    // Create services
+    const octokit = github.getOctokit(token) as unknown as Octokit;
+    const githubService = new GitHubService(octokit);
+    const openAIService = new OpenAIService(openAIKey);
+
+    // Load configuration if provided
+    let configService: ConfigService;
+    if (inputs['config-file']) {
+      try {
+        const configContent = await githubService.getFileContent(
+          {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pullNumber: context.payload.pull_request!.number
+          },
+          inputs['config-file'],
+          context.sha
+        );
+        
+        if ('content' in configContent.data) {
+          const config = JSON.parse(Buffer.from(configContent.data.content, 'base64').toString());
+          configService = new ConfigService(config);
+        } else {
+          throw new ValidationError('Invalid config file format');
+        }
+      } catch (error) {
+        console.warn('Failed to load custom config, using defaults:', error);
+        configService = new ConfigService();
+      }
+    } else {
+      configService = new ConfigService();
+    }
+
+    const codeReviewService = new CodeReviewService(githubService, openAIService, configService);
+
+    // Create GitHub context
+    const githubContext: GitHubContext = {
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pullNumber: context.payload.pull_request!.number
+    };
+
+    // Get PR details
+    const { data: pr } = await githubService.getPullRequest(githubContext);
+
+    // Get PR files and calculate statistics
+    const { data: files } = await githubService.getPullRequestFiles(githubContext);
+    const stats = githubService.calculatePullRequestStats(files);
+
+    // Generate and post summary
+    const summary = githubService.generateSummary(stats, files);
+    await githubService.createComment(githubContext, summary);
+
+    // Perform code review
+    await codeReviewService.reviewPullRequest(githubContext);
+
+    // Set outputs
+    core.setOutput('total_files', stats.totalFiles);
+    core.setOutput('additions', stats.additions);
+    core.setOutput('deletions', stats.deletions);
+    core.setOutput('total_changes', stats.changes);
 
   } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message);
+    if (error instanceof PRGenieError) {
+      core.setFailed(`[${error.code}] ${error.message}`);
+    } else if (error instanceof Error) {
+      if (isRateLimitError(error)) {
+        core.setFailed('Rate limit exceeded. Please try again later.');
+      } else if (isNetworkError(error)) {
+        core.setFailed('Network error occurred. Please check your connection and try again.');
+      } else {
+        core.setFailed(error.message);
+      }
     } else {
       core.setFailed('An unexpected error occurred');
     }

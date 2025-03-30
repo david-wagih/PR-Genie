@@ -1,32 +1,49 @@
-name: 'PR Analysis Action'
-description: 'Analyzes pull requests and provides a detailed summary of changes including files changed, lines added/removed, and AI-powered code review'
+name: 'PR Genie'
+description: 'AI-powered code review assistant for pull requests'
+
 author: 'david-wagih'
 
-branding:
-  icon: 'git-pull-request'
-  color: 'green'
-
 inputs:
-  github-token:
-    description: 'GitHub token for API access'
-    required: true
-  pr-number:
-    description: 'Pull request number to analyze'
-    required: true
   openai-key:
-    description: 'OpenAI API key for code review functionality'
+    description: 'OpenAI API key for code review'
     required: true
+    sensitive: true
+  config-file:
+    description: 'Path to custom configuration file (optional)'
+    required: false
+    default: 'config/pr-genie.config.json'
 
 outputs:
   total_files:
-    description: 'Total number of files changed in the PR'
+    description: 'Total number of files reviewed'
   additions:
-    description: 'Total number of lines added in the PR'
+    description: 'Total number of lines added'
   deletions:
-    description: 'Total number of lines deleted in the PR'
+    description: 'Total number of lines deleted'
   total_changes:
-    description: 'Total number of changes (additions + deletions)'
+    description: 'Total number of lines changed'
 
 runs:
   using: 'node20'
-  main: 'dist/index.js' 
+  main: 'dist/index.js'
+
+branding:
+  icon: 'robot'
+  color: 'blue'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# Security best practices
+security:
+  # Ensure the action only runs on pull request events
+  events:
+    - pull_request
+  # Minimize token permissions
+  token:
+    permissions:
+      contents: read
+      pull-requests: write
+  # Prevent workflow from running on forks
+  prevent-fork: true 
