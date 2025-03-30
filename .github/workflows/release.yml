@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build
+        run: npm run build
+
       - name: Create Release PR
         id: release
         uses: googleapis/release-please-action@v4
@@ -35,6 +38,15 @@ jobs:
           release-type: node
           package-name: pr-genie
           token: ${{ secrets.RELEASE_TOKEN }}
+          changelog-types: |
+            [
+              {"type":"feat","section":"Features","hidden":false},
+              {"type":"fix","section":"Bug Fixes","hidden":false},
+              {"type":"chore","section":"Miscellaneous","hidden":false},
+              {"type":"refactor","section":"Refactoring","hidden":false},
+              {"type":"docs","section":"Documentation","hidden":false},
+              {"type":"test","section":"Tests","hidden":true}
+            ]
           
       - name: Create GitHub Release
         if: ${{ steps.release.outputs.release_created }}
@@ -46,40 +58,4 @@ jobs:
           name: Release ${{ steps.release.outputs.tag_name }}
           body: ${{ steps.release.outputs.body }}
           draft: false
-          prerelease: false
-
-      - name: Configure Git
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Bump version
-        id: bump_version
-        run: |
-          # Get the current version from package.json
-          current_version=$(node -p "require('./package.json').version")
-          echo "Current version: $current_version"
-          
-          # Split the version into major, minor, and patch
-          IFS='.' read -r major minor patch <<< "$current_version"
-          
-          # Increment patch version
-          new_patch=$((patch + 1))
-          new_version="$major.$minor.$new_patch"
-          echo "New version: $new_version"
-          
-          # Update package.json with new version
-          npm version $new_version --no-git-tag-version
-          
-          # Set output for later steps
-          echo "new_version=$new_version" >> $GITHUB_OUTPUT
-          echo "Version bumped from $current_version to $new_version"
-
-      - name: Build
-        run: npm run build
-
-      - name: Commit and Push Changes
-        run: |
-          git add package.json package-lock.json
-          git commit -m "chore: bump version to v${{ steps.bump_version.outputs.new_version }}"
-          git push 
+          prerelease: false 
