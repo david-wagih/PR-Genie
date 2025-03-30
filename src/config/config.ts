@@ -1,4 +1,4 @@
-import { ReviewConfig, LanguageConfig, FilePattern } from '../types';
+import { ReviewConfig, LanguageConfig } from '../types';
 
 export const DEFAULT_LANGUAGE_CONFIG: LanguageConfig = {
   fileExtensions: [],

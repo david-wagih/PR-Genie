@@ -1,4 +1,5 @@
-import { ReviewConfig, LanguageConfig, FilePattern, DEFAULT_REVIEW_CONFIG } from '../config/config';
+import { ReviewConfig, LanguageConfig, FilePattern } from '../types';
+import { DEFAULT_REVIEW_CONFIG, DEFAULT_LANGUAGE_CONFIG } from '../config/config';
 import { minimatch } from 'minimatch';
 
 export class ConfigService {
@@ -29,7 +30,7 @@ export class ConfigService {
 
   getLanguageConfig(language: string): LanguageConfig {
     return this.config.languages[language] || {
-      ...DEFAULT_REVIEW_CONFIG.languages.typescript,
+      ...DEFAULT_LANGUAGE_CONFIG,
       fileExtensions: [],
       ignorePatterns: []
     };
@@ -61,8 +62,8 @@ export class ConfigService {
     const extension = filepath.split('.').pop()?.toLowerCase();
     if (!extension) return null;
 
-    for (const [language, config] of Object.entries(this.config.languages)) {
-      if (config.fileExtensions.includes(extension)) {
+    for (const [language, langConfig] of Object.entries(this.config.languages)) {
+      if (langConfig.fileExtensions.includes(extension)) {
         return language;
       }
     }
