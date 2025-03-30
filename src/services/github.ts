@@ -151,8 +151,8 @@ ${rows}`;
   generateReviewComment(file: PullRequestFile, review: ReviewFeedback, fileContent: string): string {
     const sections = [];
 
-    // Add file header
-    sections.push(`## 📝 Review for \`${file.filename}\`\n`);
+    // Add file header with change statistics
+    sections.push(`## 📝 Review for \`${file.filename}\` (${file.additions}+/${file.deletions}-)\n`);
 
     // Add each section with context
     if (review.security?.length) {
@@ -176,5 +176,10 @@ ${rows}`;
     }
 
     return sections.join('\n');
+  }
+
+  // New method to calculate file statistics
+  calculateFileStats(file: PullRequestFile): string {
+    return `- Changes: ${file.changes} lines (${file.additions} additions, ${file.deletions} deletions)`;
   }
 } 
