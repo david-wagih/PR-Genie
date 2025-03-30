@@ -14,12 +14,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install @actions/core @actions/github @octokit/rest
+          
+      - name: Build
+        run: npm run build
+      
       - name: Run PR Genie
+        id: pr-genie
         uses: ./ # Uses the action in the root directory
         with:
-          github-token: ${{ github.token }}
           openai-key: ${{ secrets.OPENAI_API_KEY }}
-          pr-number: ${{ github.event.pull_request.number }}
           config-file: pr-genie.config.json  # Optional config file
 
       # Add a test step to verify the action outputs
