@@ -1,26 +1,13 @@
-name: 'PR Genie'
-description: 'AI-powered code review assistant for pull requests'
+name: 'PR Genie 🧞'
+description: 'AI-powered code review assistant for GitHub pull requests that provides intelligent code analysis, suggestions, and best practices recommendations.'
 
 author: 'david-wagih'
 
 inputs:
-  github-token:
-    description: 'GitHub token for API access'
-    required: true
-    sensitive: true
-    default: '${{ github.token }}'
   openai-key:
     description: 'OpenAI API key for code review'
     required: true
     sensitive: true
-  pr-number:
-    description: 'Pull request number to review'
-    required: true
-    default: '${{ github.event.pull_request.number }}'
-  config-file:
-    description: 'Path to custom configuration file (optional)'
-    required: false
-    default: 'config/pr-genie.config.json'
 
 outputs:
   total_files:
@@ -37,8 +24,8 @@ runs:
   main: 'dist/index.js'
 
 branding:
-  icon: 'robot'
-  color: 'blue'
+  icon: 'magic'
+  color: 'purple'
 
 permissions:
   contents: read

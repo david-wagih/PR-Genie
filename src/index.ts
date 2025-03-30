@@ -28,11 +28,10 @@ async function run(): Promise<void> {
     // Get and validate inputs
     const inputs = {
       'openai-key': core.getInput('openai-key', { required: true }),
-      'config-file': core.getInput('config-file', { required: false }),
     };
 
-    // Validate and sanitize tokens
-    const token = process.env.GITHUB_TOKEN;
+    // Get the GitHub token from the environment
+    const token = process.env.GITHUB_TOKEN || core.getInput('GITHUB_TOKEN');
     if (!token) {
       throw new ValidationError('GitHub token is required');
     }
@@ -45,34 +44,7 @@ async function run(): Promise<void> {
     const octokit = github.getOctokit(token) as unknown as Octokit;
     const githubService = new GitHubService(octokit);
     const openAIService = new OpenAIService(openAIKey);
-
-    // Load configuration if provided
-    let configService: ConfigService;
-    if (inputs['config-file']) {
-      try {
-        const configContent = await githubService.getFileContent(
-          {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pullNumber: context.payload.pull_request.number,
-          },
-          inputs['config-file'],
-          context.sha
-        );
-
-        if ('content' in configContent.data) {
-          const config = JSON.parse(Buffer.from(configContent.data.content, 'base64').toString());
-          configService = new ConfigService(config);
-        } else {
-          throw new ValidationError('Invalid config file format');
-        }
-      } catch (error) {
-        console.warn('Failed to load custom config, using defaults:', error);
-        configService = new ConfigService();
-      }
-    } else {
-      configService = new ConfigService();
-    }
+    const configService = new ConfigService(); // Using default configuration
 
     const codeReviewService = new CodeReviewService(githubService, openAIService, configService);
 
