@@ -100,45 +100,146 @@ export class GitHubService {
   }
 
   generateSummary(stats: PullRequestStats, files: PullRequestFile[]): string {
-    const sections = [];
+    return `# 📊 Pull Request Analysis
 
-    // Add PR Overview section
-    sections.push(`# 🔍 Pull Request Review
+## Overview
+- 📁 Files changed: ${stats.totalFiles}
+- ✨ Lines added: ${stats.additions}
+- 🗑️ Lines removed: ${stats.deletions}
+- 📈 Total changes: ${stats.changes}
 
-## 📊 Overview
-- **Total Changes**: ${stats.changes} lines (${stats.additions} additions, ${stats.deletions} deletions)
-- **Files Modified**: ${stats.totalFiles} files
-- **Complexity Score**: ${this.calculateComplexityScore(stats)}
-- **Review Priority**: ${this.determineReviewPriority(stats)}
+## PR Review
 
-## 🔎 Changes Analysis
-${this.generateChangesAnalysis(files)}
+### ⏱️ Estimated effort to review [1-5]
+${this.estimateReviewEffort(stats)}
+${this.explainReviewEffort(stats, files)}
 
-## 💡 Key Points
-${this.generateKeyPoints(files)}
+### 🧪 Relevant tests
+${this.checkRelevantTests(files)}
 
-## 📝 Detailed Changes
-${this.generateDetailedChanges(files)}
+### 🔍 Possible issues
+${this.identifyPossibleIssues(files)}
 
-## 🚀 Next Steps
-${this.generateNextSteps(stats, files)}
-`);
+### 🔒 Security concerns
+${this.identifySecurityConcerns(files)}
 
-    return sections.join('\n');
+## Files Changed
+${this.generateFileChanges(files)}`;
   }
 
-  private calculateComplexityScore(stats: PullRequestStats): string {
+  private estimateReviewEffort(stats: PullRequestStats): string {
+    const score = Math.min(5, Math.ceil((stats.changes / 100) + (stats.totalFiles / 3)));
+    return `${score}`;
+  }
+
+  private explainReviewEffort(stats: PullRequestStats, files: PullRequestFile[]): string {
+    const reasons = [];
+    
+    if (stats.changes > 200) {
+      reasons.push("large number of changes");
+    }
+    if (stats.totalFiles > 5) {
+      reasons.push("multiple files affected");
+    }
+    if (files.some(f => f.filename.includes('config') || f.filename.endsWith('.json') || f.filename.endsWith('.yml'))) {
+      reasons.push("configuration changes require careful review");
+    }
+    if (files.some(f => f.changes > 100)) {
+      reasons.push("contains large file changes");
+    }
+
+    if (reasons.length === 0) {
+      return "because the changes are straightforward and well-contained.";
+    }
+
+    return `because of ${reasons.join(", ")}.`;
+  }
+
+  private checkRelevantTests(files: PullRequestFile[]): string {
+    const testFiles = files.filter(f => 
+      f.filename.includes('test') || 
+      f.filename.includes('spec') || 
+      f.filename.endsWith('.test.ts') || 
+      f.filename.endsWith('.spec.ts')
+    );
+
+    if (testFiles.length === 0) {
+      return "No test files were modified. Consider adding tests for the changes.";
+    }
+
+    return `Yes - ${testFiles.map(f => f.filename).join(', ')}`;
+  }
+
+  private identifyPossibleIssues(files: PullRequestFile[]): string {
+    const issues = [];
+
+    // Check for large files without tests
+    if (files.some(f => f.changes > 100) && !files.some(f => f.filename.includes('test'))) {
+      issues.push("Large code changes without corresponding test updates");
+    }
+
+    // Check for configuration changes
+    if (files.some(f => f.filename.includes('config'))) {
+      issues.push("Configuration changes may impact environment behavior");
+    }
+
+    // Check for dependency changes
+    if (files.some(f => f.filename.includes('package.json'))) {
+      issues.push("Dependency changes may introduce compatibility issues");
+    }
+
+    // Check for type definition changes
+    if (files.some(f => f.filename.endsWith('.d.ts'))) {
+      issues.push("Type definition changes may affect dependent code");
+    }
+
+    return issues.length > 0 ? issues.join('\n') : "No significant issues identified";
+  }
+
+  private identifySecurityConcerns(files: PullRequestFile[]): string {
+    const concerns = [];
+
+    // Check for security-sensitive files
+    if (files.some(f => 
+      f.filename.includes('auth') || 
+      f.filename.includes('security') || 
+      f.filename.includes('password') ||
+      f.filename.includes('token') ||
+      f.filename.includes('secret')
+    )) {
+      concerns.push("Changes to security-sensitive components");
+    }
+
+    // Check for configuration files that might contain secrets
+    if (files.some(f => 
+      f.filename.endsWith('.env') || 
+      f.filename.includes('config') && (f.filename.endsWith('.json') || f.filename.endsWith('.yml'))
+    )) {
+      concerns.push("Modified configuration files - verify no secrets are exposed");
+    }
+
+    return concerns.length > 0 ? concerns.join('\n') : "No immediate security concerns identified";
+  }
+
+  private generateFileChanges(files: PullRequestFile[]): string {
+    return files.map(file => {
+      const changeType = this.getChangeType(file);
+      return `- ${file.filename} (+${file.additions}/-${file.deletions})`;
+    }).join('\n');
+  }
+
+  calculateComplexityScore(stats: PullRequestStats): string {
     const score = Math.min(10, Math.ceil((stats.changes / 100) + (stats.totalFiles / 3)));
     return `${score}/10`;
   }
 
-  private determineReviewPriority(stats: PullRequestStats): string {
+  determineReviewPriority(stats: PullRequestStats): string {
     if (stats.changes > 500 || stats.totalFiles > 10) return '🔴 High';
     if (stats.changes > 200 || stats.totalFiles > 5) return '🟡 Medium';
     return '🟢 Low';
   }
 
-  private generateChangesAnalysis(files: PullRequestFile[]): string {
+  generateChangesAnalysis(files: PullRequestFile[]): string {
     const fileTypes = new Map<string, number>();
     files.forEach(file => {
       const ext = file.filename.split('.').pop() || 'unknown';
@@ -153,7 +254,7 @@ ${this.generateNextSteps(stats, files)}
     return analysis.join('\n');
   }
 
-  private generateKeyPoints(files: PullRequestFile[]): string {
+  generateKeyPoints(files: PullRequestFile[]): string {
     const points = [];
     
     // Check for configuration changes
@@ -184,7 +285,7 @@ ${this.generateNextSteps(stats, files)}
     return points.length ? points.join('\n') : '- No significant points to highlight';
   }
 
-  private generateDetailedChanges(files: PullRequestFile[]): string {
+  generateDetailedChanges(files: PullRequestFile[]): string {
     return files.map(file => {
       const changeType = this.getChangeType(file);
       const impact = this.assessFileImpact(file);
@@ -192,21 +293,21 @@ ${this.generateNextSteps(stats, files)}
     }).join('\n\n');
   }
 
-  private getChangeType(file: PullRequestFile): string {
+  getChangeType(file: PullRequestFile): string {
     if (file.status === 'added') return '✨ New File';
     if (file.status === 'removed') return '🗑️ Deleted';
     if (file.status === 'renamed') return '📝 Renamed';
     return '📝 Modified';
   }
 
-  private assessFileImpact(file: PullRequestFile): string {
+  assessFileImpact(file: PullRequestFile): string {
     const totalChanges = file.additions + file.deletions;
     if (totalChanges > 100) return '🔴 High';
     if (totalChanges > 50) return '🟡 Medium';
     return '🟢 Low';
   }
 
-  private generateNextSteps(stats: PullRequestStats, files: PullRequestFile[]): string {
+  generateNextSteps(stats: PullRequestStats, files: PullRequestFile[]): string {
     const steps = [];
 
     if (stats.changes > 200) {
@@ -228,7 +329,7 @@ ${this.generateNextSteps(stats, files)}
     return steps.length ? steps.join('\n') : '- Ready for review';
   }
 
-  private getCodeContext(content: string, lineNumber: number, contextLines: number = 3): string {
+  getCodeContext(content: string, lineNumber: number, contextLines: number = 3): string {
     const lines = content.split('\n');
     const start = Math.max(0, lineNumber - contextLines - 1);
     const end = Math.min(lines.length, lineNumber + contextLines);
@@ -241,7 +342,7 @@ ${this.generateNextSteps(stats, files)}
       .join('\n');
   }
 
-  private formatReviewSection(title: string, comments: ReviewComment[], fileContent: string): string {
+  formatReviewSection(title: string, comments: ReviewComment[], fileContent: string): string {
     if (!comments?.length) return '';
 
     const rows = comments.map(comment => {
@@ -286,7 +387,6 @@ ${rows}`;
     return sections.join('\n');
   }
 
-  // New method to calculate file statistics
   calculateFileStats(file: PullRequestFile): string {
     return `- Changes: ${file.changes} lines (${file.additions} additions, ${file.deletions} deletions)`;
   }
