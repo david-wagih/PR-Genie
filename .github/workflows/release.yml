@@ -39,8 +39,11 @@ jobs:
           release-type: node
           token: ${{ secrets.RELEASE_TOKEN }}
           target-branch: master
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json
+          path: .
+          monorepo-tags: false
+          skip-github-release: false
+          skip-github-pull-request: false
+          include-v-in-tag: true
 
       - name: Create GitHub Release
         if: ${{ steps.release.outputs.release_created }}
