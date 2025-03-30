@@ -32,7 +32,9 @@ jobs:
         id: pr-genie
         uses: ./ # Uses the action in the root directory
         with:
+          github-token: ${{ github.token }}
           openai-key: ${{ secrets.OPENAI_API_KEY }}
+          pr-number: ${{ github.event.pull_request.number }}
           config-file: pr-genie.config.json  # Optional config file
 
       # Add a test step to verify the action outputs
