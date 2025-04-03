@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/david-wagih/PR-Genie/compare/v1.2.0...v1.3.0) (2025-04-03)
+
+
+### Features
+
+* add GITHUB_TOKEN input for API authentication in action.yml ([fbe8d85](https://github.com/david-wagih/PR-Genie/commit/fbe8d85347976f9c3a8c8212899f185a1cbe4c33))
+
 ## [1.2.0](https://github.com/david-wagih/PR-Genie/compare/v1.1.5...v1.2.0) (2025-04-03)
 
 
