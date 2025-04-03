@@ -10,7 +10,8 @@ import { CodeReviewService } from './services/code-review';
 import { ConfigService } from './services/config';
 import { GitHubContext } from './types';
 
-async function run(): Promise<void> {
+async function run(retryCount = 0): Promise<void> {
+  const MAX_RETRIES = 5; // Define a maximum retry limit
   try {
     // Get the event context
     const context = github.context;
@@ -79,9 +80,20 @@ async function run(): Promise<void> {
       core.setFailed(`[${error.code}] ${error.message}`);
     } else if (error instanceof Error) {
       if (isRateLimitError(error)) {
-        core.setFailed('Rate limit exceeded. Please try again later.');
+        core.warning('Rate limit exceeded. Retrying...');
+        await new Promise(resolve => setTimeout(resolve, 60000)); // Wait 1 minute
+        if (retryCount < MAX_RETRIES) {
+          const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+          core.warning(`Retrying in ${delay / 1000} seconds...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          await run(retryCount + 1); // Retry with incremented count
+        } else {
+          core.setFailed('Maximum retry attempts reached. Aborting...');
+        }
       } else if (isNetworkError(error)) {
-        core.setFailed('Network error occurred. Please check your connection and try again.');
+        core.warning('Network error occurred. Retrying...');
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        await run(); // Retry the action
       } else {
         core.setFailed(error.message);
       }

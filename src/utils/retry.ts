@@ -4,6 +4,11 @@ export interface RetryOptions {
   backoffFactor?: number;
 }
 
+function log(level: 'info' | 'warning' | 'error', message: string): void {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}`);
+}
+
 export async function withRetry<T>(operation: () => Promise<T>, options: RetryOptions): Promise<T> {
   let lastError: Error | null = null;
   let delay = options.delayMs;
@@ -19,7 +24,10 @@ export async function withRetry<T>(operation: () => Promise<T>, options: RetryOp
       }
 
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise(resolve => {
+        log('info', `Retrying operation in ${delay}ms (Attempt ${attempt}/${options.maxAttempts})`);
+        setTimeout(resolve, delay);
+      });
 
       // Increase delay for next attempt if backoff is enabled
       if (options.backoffFactor) {

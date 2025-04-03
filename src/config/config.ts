@@ -51,6 +51,24 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
       ],
       additionalChecks: ['Java coding standards', 'Exception handling', 'Design patterns'],
     },
+    ruby: {
+      fileExtensions: ['rb'],
+      maxFileSize: 1000000,
+      ignorePatterns: [
+        { pattern: '**/vendor/**', reason: 'Dependencies' },
+        { pattern: '**/*.gem', reason: 'Ruby gems' },
+      ],
+      additionalChecks: ['Ruby style guide compliance', 'RSpec tests'],
+    },
+    go: {
+      fileExtensions: ['go'],
+      maxFileSize: 2000000,
+      ignorePatterns: [
+        { pattern: '**/vendor/**', reason: 'Dependencies' },
+        { pattern: '**/*.mod', reason: 'Go modules' },
+      ],
+      additionalChecks: ['Go idiomatic code', 'Unit tests'],
+    },
   },
   globalIgnorePatterns: [
     { pattern: '**/.git/**', reason: 'Git repository' },
@@ -62,48 +80,6 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
   defaultMaxFileSize: 1000000,
   defaultPrompt: `You are an expert code reviewer with deep expertise in {language}. Review the following code changes and provide a comprehensive analysis.
 
-Please analyze the code and provide a review in the following format:
-
-{
-  "estimatedEffort": {
-    "score": number, // 1-5 scale
-    "explanation": string // Brief explanation of the score
-  },
-  "relevantTests": {
-    "exists": boolean,
-    "details": string // Description of test coverage or what tests are needed
-  },
-  "possibleIssues": [
-    {
-      "title": string,
-      "description": string,
-      "severity": "high" | "medium" | "low",
-      "lineNumbers": number[],
-      "suggestion": string
-    }
-  ],
-  "securityConcerns": [
-    {
-      "title": string,
-      "description": string,
-      "severity": "high" | "medium" | "low",
-      "lineNumbers": number[],
-      "suggestion": string
-    }
-  ],
-  "codeQuality": {
-    "strengths": string[],
-    "improvements": [
-      {
-        "title": string,
-        "description": string,
-        "lineNumbers": number[],
-        "suggestion": string
-      }
-    ]
-  }
-}
-
 Focus on:
 1. Security vulnerabilities and best practices
 2. Performance implications and optimizations
@@ -112,8 +88,24 @@ Focus on:
 5. {language}-specific best practices
 6. Project architecture and design patterns
 
-Additional checks to consider:
-{additionalChecks}
+For large PRs, prioritize:
+- Critical files (e.g., configuration, security-sensitive files)
+- Files with the most changes
+
+Provide your feedback in the following format:
+{
+  "summary": string, // High-level summary of the review
+  "issues": [
+    {
+      "title": string,
+      "description": string,
+      "severity": "high" | "medium" | "low",
+      "lineNumbers": number[],
+      "suggestion": string
+    }
+  ],
+  "recommendations": string[] // General recommendations for the PR
+}
 
 Code to review:
 \`\`\`{language}

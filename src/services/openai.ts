@@ -22,7 +22,7 @@ export class OpenAIService {
               {
                 role: 'system',
                 content:
-                  'You are an expert code reviewer specialized in TypeScript and GitHub Actions. Provide clear, actionable feedback focused on security, performance, and best practices.',
+                  'You are an expert code reviewer. Provide clear, actionable feedback focused on security, performance, and best practices.',
               },
               {
                 role: 'user',
@@ -50,7 +50,8 @@ export class OpenAIService {
       return this.formatReviewFeedback(review);
     } catch (e) {
       console.error('Failed to parse review response:', e);
-      return {};
+      // Fallback to an empty review feedback that conforms to the interface
+      return {} as ReviewFeedback;
     }
   }
 
