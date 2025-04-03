@@ -8,6 +8,10 @@ inputs:
     description: 'OpenAI API key for code review'
     required: true
     sensitive: true
+  GITHUB_TOKEN:
+    description: 'GitHub token for API authentication'
+    required: true
+    default: ${{ github.token }}
 
 outputs:
   total_files:
