@@ -38,7 +38,7 @@ export function sanitizeCodeContent(content: string): string {
 }
 
 export function validateGitHubToken(token: string): void {
-  if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+  if (!token.startsWith('ghp_') && !token.startsWith('github_pat_') && !token.startsWith('ghs_')) {
     throw new SecurityError('Invalid GitHub token format');
   }
 }

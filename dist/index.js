@@ -31327,7 +31327,7 @@ function sanitizeCodeContent(content) {
         .replace(/import\s*\(/gi, ''); // Remove dynamic imports
 }
 function validateGitHubToken(token) {
-    if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+    if (!token.startsWith('ghp_') && !token.startsWith('github_pat_') && !token.startsWith('ghs_')) {
         throw new errors_1.SecurityError('Invalid GitHub token format');
     }
 }
