@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://github.com/david-wagih/PR-Genie/compare/v1.1.5...v1.2.0) (2025-04-03)
+
+
+### Features
+
+* enhance OpenAI service and add retry logging; update README with usage example ([b872b99](https://github.com/david-wagih/PR-Genie/commit/b872b99ccd1d93fd7e45c140cc9c23ebdff162ce))
+* integrate @vercel/ncc for build optimization and update package scripts ([c138df6](https://github.com/david-wagih/PR-Genie/commit/c138df68b36884b50e7d5b1aaea7c600c108aab7))
+
 ## [1.1.5](https://github.com/david-wagih/PR-Genie/compare/v1.1.4...v1.1.5) (2025-03-30)
 
 
