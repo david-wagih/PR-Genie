@@ -1,6 +1,6 @@
 # PR Genie 🧞
 
-An AI-powered code review assistant for GitHub pull requests that provides intelligent code analysis, suggestions, and best practices recommendations.
+An AI-powered code review assistant for your pull requests that provides intelligent code analysis, suggestions, and best practices recommendations.
 
 ## Features
 
