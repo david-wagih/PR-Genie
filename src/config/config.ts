@@ -20,7 +20,8 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
       additionalChecks: [
         'TypeScript type safety',
         'Interface and type definitions',
-        'Generic type usage',
+        'Proper error handling',
+        'Null/undefined checks'
       ],
     },
     javascript: {
@@ -30,7 +31,7 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
         { pattern: '**/node_modules/**', reason: 'Dependencies' },
         { pattern: '**/dist/**', reason: 'Build output' },
       ],
-      additionalChecks: ['ESLint compliance', 'Modern JavaScript features', 'Async/await patterns'],
+      additionalChecks: ['Error handling', 'Modern JavaScript features', 'Proper null checks'],
     },
     python: {
       fileExtensions: ['py'],
@@ -40,7 +41,7 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
         { pattern: '**/*.pyc', reason: 'Python compiled files' },
         { pattern: '**/venv/**', reason: 'Virtual environment' },
       ],
-      additionalChecks: ['PEP 8 compliance', 'Type hints', 'Docstring coverage'],
+      additionalChecks: ['Exception handling', 'Type hints', 'Input validation'],
     },
     java: {
       fileExtensions: ['java'],
@@ -49,16 +50,7 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
         { pattern: '**/target/**', reason: 'Build output' },
         { pattern: '**/*.class', reason: 'Compiled files' },
       ],
-      additionalChecks: ['Java coding standards', 'Exception handling', 'Design patterns'],
-    },
-    ruby: {
-      fileExtensions: ['rb'],
-      maxFileSize: 1000000,
-      ignorePatterns: [
-        { pattern: '**/vendor/**', reason: 'Dependencies' },
-        { pattern: '**/*.gem', reason: 'Ruby gems' },
-      ],
-      additionalChecks: ['Ruby style guide compliance', 'RSpec tests'],
+      additionalChecks: ['Exception handling', 'Null checks', 'Resource management'],
     },
     go: {
       fileExtensions: ['go'],
@@ -67,7 +59,7 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
         { pattern: '**/vendor/**', reason: 'Dependencies' },
         { pattern: '**/*.mod', reason: 'Go modules' },
       ],
-      additionalChecks: ['Go idiomatic code', 'Unit tests'],
+      additionalChecks: ['Error handling', 'Goroutine safety', 'Proper resource closing'],
     },
   },
   globalIgnorePatterns: [
@@ -78,38 +70,55 @@ export const DEFAULT_REVIEW_CONFIG: ReviewConfig = {
     { pattern: '**/*.map', reason: 'Source maps' },
   ],
   defaultMaxFileSize: 1000000,
-  defaultPrompt: `You are an expert code reviewer with deep expertise in {language}. Review the following code changes and provide a comprehensive analysis.
+  defaultPrompt: `You are an expert code reviewer with deep expertise in {language}. Review the following code changes and provide concise, actionable feedback.
 
-Focus on:
-1. Security vulnerabilities and best practices
-2. Performance implications and optimizations
-3. Code maintainability and readability
-4. Error handling and edge cases
-5. {language}-specific best practices
-6. Project architecture and design patterns
+Focus ONLY on important issues:
+1. Security vulnerabilities
+2. Critical performance problems
+3. Error handling gaps
+4. Logical errors or bugs
+5. Maintainability concerns
 
-For large PRs, prioritize:
-- Critical files (e.g., configuration, security-sensitive files)
-- Files with the most changes
-
-Provide your feedback in the following format:
+Return your findings in this JSON format:
 {
-  "summary": string, // High-level summary of the review
-  "issues": [
+  "securityConcerns": [
     {
-      "title": string,
-      "description": string,
-      "severity": "high" | "medium" | "low",
-      "lineNumbers": number[],
-      "suggestion": string
+      "title": "Brief issue title",
+      "description": "Concise explanation",
+      "severity": "high|medium|low",
+      "lineNumbers": [number array],
+      "suggestion": "Specific fix recommendation"
     }
   ],
-  "recommendations": string[] // General recommendations for the PR
+  "possibleIssues": [
+    {
+      "title": "Brief issue title",
+      "description": "Concise explanation", 
+      "severity": "high|medium|low",
+      "lineNumbers": [number array],
+      "suggestion": "Specific fix recommendation"
+    }
+  ],
+  "codeQuality": {
+    "improvements": [
+      {
+        "title": "Brief improvement title",
+        "description": "Concise explanation",
+        "lineNumbers": [number array],
+        "suggestion": "Specific implementation suggestion"
+      }
+    ]
+  }
 }
+
+Prioritize critical issues over style/cosmetic concerns. Only include problems that actually impact code quality.
 
 Code to review:
 \`\`\`{language}
 {code}
 \`\`\``,
-  defaultChecks: ['Code organization', 'Error handling', 'Documentation', 'Testing considerations'],
+  defaultChecks: ['Error handling', 'Security', 'Resource management', 'Input validation'],
 };
+
+// Custom config file path
+export const CONFIG_FILE_PATH = '.github/pr-genie-config.json';

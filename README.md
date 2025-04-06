@@ -5,12 +5,24 @@ An AI-powered code review assistant for GitHub pull requests that provides intel
 ## Features
 
 - 🤖 AI-powered code review using OpenAI's GPT models
-- 📊 Detailed PR statistics and change analysis
-- 🔍 Smart file filtering and language-specific reviews
-- ⚙️ Customizable configuration through `pr-genie.config.json`
+- 🔍 Focus on critical code quality issues, not style nits
+- 🔐 Security vulnerability detection
+- 🐛 Bug and logic error identification
+- ⚠️ Error handling analysis
+- ⚡ Optimized for large PRs with parallel processing
+- 🌍 Multi-language support with language-specific reviews
+- ⚙️ Customizable review standards through `.github/pr-genie-config.json`
 - 🔒 Secure handling of API keys and sensitive data
-- 🌐 Support for multiple programming languages
-- 📝 Automated PR summaries and comments
+
+## Optimizations for Large PRs
+
+PR Genie uses several techniques to efficiently handle large pull requests:
+
+- **File Prioritization**: Critical files (security, auth, config) and those with more changes are reviewed first
+- **Smart Filtering**: Binary files, generated files, and overly large files are automatically skipped
+- **File Limiting**: For very large PRs, only the most important files (up to 30) are reviewed
+- **Parallel Processing**: Files are processed in parallel batches for maximum efficiency
+- **Language-Based Grouping**: Files are grouped by language to ensure language-specific review
 
 ## Requirements
 
@@ -18,27 +30,21 @@ An AI-powered code review assistant for GitHub pull requests that provides intel
 - GitHub Actions
 - OpenAI API key
 
-## Permissions
+## Custom Review Standards
 
-The action requires the following permissions:
-- `contents: read` - To read repository contents
-- `pull-requests: write` - To post review comments
+You can define your own review standards by creating a `.github/pr-genie-config.json` file:
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Testing
-
-To test the action locally:
-
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Run tests: `npm test`
+```json
+{
+  "languages": {
+    "typescript": {
+      "additionalChecks": ["Your custom TS standards here"],
+      "customPrompt": "Your custom review prompt for TypeScript"
+    }
+  },
+  "defaultChecks": ["Your global standards"]
+}
+```
 
 ## Usage Example
 
@@ -53,16 +59,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./ # Use PR Genie
+      - uses: david-wagih/pr-genie@v1
         with:
           openai-key: ${{ secrets.OPENAI_API_KEY }}
 ```
 
-## Troubleshooting
+## License
 
-- **Rate Limit Errors**: Ensure your GitHub token has sufficient permissions.
-- **OpenAI API Errors**: Verify your OpenAI API key and usage limits.
-- **File Size Issues**: Check the `maxFileSize` configuration in `config.ts`.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run tests: `npm test`
 
 ## Support
 

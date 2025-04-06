@@ -22,14 +22,14 @@ export class OpenAIService {
               {
                 role: 'system',
                 content:
-                  'You are an expert code reviewer. Provide clear, actionable feedback focused on security, performance, and best practices.',
+                  'You are an expert code reviewer. Provide clear, actionable feedback focused on security, performance, and critical issues.',
               },
               {
                 role: 'user',
                 content: prompt,
               },
             ],
-            temperature: 0.2,
+            temperature: 0.1, // Lower temperature for more consistent output
           }),
         }),
       {
@@ -50,8 +50,12 @@ export class OpenAIService {
       return this.formatReviewFeedback(review);
     } catch (e) {
       console.error('Failed to parse review response:', e);
-      // Fallback to an empty review feedback that conforms to the interface
-      return {} as ReviewFeedback;
+      // Fallback to an empty review feedback
+      return {
+        security: [],
+        issues: [],
+        improvements: []
+      };
     }
   }
 
@@ -91,21 +95,15 @@ export class OpenAIService {
     return feedback;
   }
 
-  generateReviewComment(suggestion: string, reason: string): string {
-    return `📝 **Suggestion**: ${sanitizeInput(suggestion)}\n\n💡 **Reason**: ${sanitizeInput(reason)}`;
-  }
-
   generateReviewSummary(reviewErrors: string[]): string {
     let summaryBody = [
-      '## 🤖 Code Review Complete\n\n',
-      "I've reviewed the files in this PR and provided inline comments where I found potential improvements. The review focused on:\n\n",
-      '- 🔒 Security best practices\n',
-      '- ⚡ Performance optimizations\n',
-      '- 📚 Code maintainability\n',
-      '- 🎯 Error handling\n',
-      '- 📐 Type safety\n',
-      '- 🔄 Project-specific concerns\n\n',
-      'Please review the inline comments and let me know if you have any questions!',
+      '## 🤖 Code Review Summary\n\n',
+      "I've reviewed the files in this PR and provided comments on issues found. The review focused on:\n\n",
+      '- 🔒 Security vulnerabilities\n',
+      '- ⚡ Performance problems\n',
+      '- 🐛 Logic errors and bugs\n',
+      '- ⚠️ Error handling gaps\n',
+      '- 🧩 Code maintainability\n',
     ].join('');
 
     if (reviewErrors.length > 0) {
