@@ -24,6 +24,17 @@ PR Genie uses several techniques to efficiently handle large pull requests:
 - **Parallel Processing**: Files are processed in parallel batches for maximum efficiency
 - **Language-Based Grouping**: Files are grouped by language to ensure language-specific review
 
+## Supported Languages
+
+PR Genie includes built-in support for:
+
+- TypeScript/JavaScript
+- Python
+- Java
+- Go
+
+And provides default configurations for each language with appropriate file patterns and language-specific review criteria.
+
 ## Requirements
 
 - Node.js 20 or later
@@ -38,10 +49,18 @@ You can define your own review standards by creating a `.github/pr-genie-config.
 {
   "languages": {
     "typescript": {
+      "fileExtensions": ["ts", "tsx"],
+      "maxFileSize": 1000000,
+      "ignorePatterns": [
+        { "pattern": "**/*.d.ts", "reason": "TypeScript declaration files" }
+      ],
       "additionalChecks": ["Your custom TS standards here"],
       "customPrompt": "Your custom review prompt for TypeScript"
     }
   },
+  "globalIgnorePatterns": [
+    { "pattern": "**/dist/**", "reason": "Build output" }
+  ],
   "defaultChecks": ["Your global standards"]
 }
 ```
@@ -57,12 +76,35 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: david-wagih/pr-genie@v1
         with:
           openai-key: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Optional, defaults to github.token
 ```
+
+## Security Features
+
+PR Genie includes multiple security features:
+
+- Input validation and sanitization
+- Secure token handling
+- Rate limit handling with exponential backoff
+- Automatic detection of security-critical files for priority review
+- Granular permissions management
+
+## Output Parameters
+
+The action provides the following outputs:
+
+- `total_files`: Total number of files reviewed
+- `additions`: Total number of lines added
+- `deletions`: Total number of lines deleted
+- `total_changes`: Total number of lines changed
 
 ## License
 
@@ -75,6 +117,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Run tests: `npm test`
+4. Format code: `npm run format`
+5. Lint code: `npm run lint`
+6. Build: `npm run build`
 
 ## Support
 
